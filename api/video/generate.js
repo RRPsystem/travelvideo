@@ -29,7 +29,11 @@ module.exports = async function(req, res) {
       title = 'Jouw Reis',
       voiceoverUrl = null,
       clipDuration = 7,
-      clipsPerDestination = 2  // Aantal clips per bestemming (1-3)
+      clipsPerDestination = 2,  // Aantal clips per bestemming (1-3)
+      travelData = null,        // Full Travel Compositor data for overlays
+      showHotelOverlay = true,  // Show hotel info overlay
+      showFlightOverlay = true, // Show flight info overlay
+      overlayDuration = 0.4     // Overlay shows for 40% of clip duration (max 50%)
     } = req.body;
 
     if (!destinations || destinations.length === 0) {
@@ -51,8 +55,13 @@ module.exports = async function(req, res) {
 
     console.log('[VideoGen] Found clips:', validClips.length);
 
-    // Step 2: Create timeline
-    const timeline = createTimeline(validClips, title, clipDuration, voiceoverUrl);
+    // Step 2: Create timeline with travel data overlays
+    const timeline = createTimeline(validClips, title, clipDuration, voiceoverUrl, {
+      travelData,
+      showHotelOverlay,
+      showFlightOverlay,
+      overlayDuration: Math.min(overlayDuration, 0.5) // Max 50%
+    });
 
     // Step 3: Submit to Shotstack
     const renderResponse = await submitToShotstack(timeline, SHOTSTACK_API_KEY, SHOTSTACK_ENV);
@@ -126,9 +135,48 @@ async function searchVideoClip(destination, apiKey) {
   return clips.length > 0 ? clips[0] : null;
 }
 
-function createTimeline(clips, title, clipDuration, voiceoverUrl) {
+function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) {
+  const { 
+    travelData = null, 
+    showHotelOverlay = true, 
+    showFlightOverlay = true,
+    overlayDuration = 0.4 
+  } = options;
+  
   const tracks = [];
   let currentTime = 0;
+  const overlayLength = clipDuration * overlayDuration; // Overlay duration (e.g., 40% of clip)
+
+  // Extract hotels and flights from travel data
+  const hotels = travelData?.hotels || [];
+  const flights = travelData?.flights || [];
+  const destinations = travelData?.destinations || [];
+
+  // Helper: Find hotel for a destination
+  function findHotelForDestination(destName) {
+    if (!destName || hotels.length === 0) return null;
+    const destLower = destName.toLowerCase();
+    return hotels.find(h => {
+      const hotelCity = (h.city || h.location || h.destination || '').toLowerCase();
+      return hotelCity.includes(destLower) || destLower.includes(hotelCity);
+    });
+  }
+
+  // Helper: Find flight for destination (outbound or return)
+  function findFlightForDestination(destName, isFirst, isLast) {
+    if (!destName || flights.length === 0) return null;
+    const destLower = destName.toLowerCase();
+    
+    // For first destination, show outbound flight
+    if (isFirst && flights.length > 0) {
+      return flights[0];
+    }
+    // For last destination, show return flight
+    if (isLast && flights.length > 1) {
+      return flights[flights.length - 1];
+    }
+    return null;
+  }
 
   // Track 1: Video clips
   const videoClips = clips.map((clip, index) => {
@@ -154,7 +202,7 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl) {
 
   tracks.push({ clips: videoClips });
 
-  // Track 2: Title overlay
+  // Track 2: Title overlay (intro)
   tracks.push({
     clips: [{
       asset: {
@@ -175,8 +223,8 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl) {
     }]
   });
 
-  // Track 3: Destination overlays
-  const textClips = clips.map((clip, index) => {
+  // Track 3: Destination name overlays (bottom left, brief)
+  const destNameClips = clips.map((clip, index) => {
     return {
       asset: {
         type: 'title',
@@ -188,21 +236,125 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl) {
         position: 'bottomLeft'
       },
       start: index * clipDuration,
-      length: clipDuration,
+      length: overlayLength, // Only show for part of clip
       offset: {
         x: 0.05,
         y: -0.1
       },
       transition: {
         in: 'slideLeft',
-        out: 'slideLeft'
+        out: 'fade'
       }
     };
   });
 
-  tracks.push({ clips: textClips });
+  tracks.push({ clips: destNameClips });
 
-  // Track 4: Voice-over
+  // Track 4: Hotel info overlays (bottom right, after destination name fades)
+  if (showHotelOverlay && hotels.length > 0) {
+    const hotelClips = [];
+    
+    clips.forEach((clip, index) => {
+      const hotel = findHotelForDestination(clip.destination);
+      if (hotel) {
+        // Build hotel text
+        const hotelName = hotel.name || hotel.title || 'Hotel';
+        const stars = hotel.stars ? '★'.repeat(hotel.stars) : '';
+        const checkIn = hotel.checkIn || hotel.startDate || '';
+        const checkOut = hotel.checkOut || hotel.endDate || '';
+        const nights = hotel.nights || '';
+        
+        let hotelText = `🏨 ${hotelName}`;
+        if (stars) hotelText += ` ${stars}`;
+        if (nights) hotelText += `\n${nights} nachten`;
+        else if (checkIn && checkOut) hotelText += `\n${checkIn} - ${checkOut}`;
+        
+        hotelClips.push({
+          asset: {
+            type: 'html',
+            html: `<div style="font-family: Arial, sans-serif; background: rgba(0,0,0,0.7); padding: 12px 20px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+              <div style="color: #a78bfa; font-size: 12px; margin-bottom: 4px;">ACCOMMODATIE</div>
+              <div style="color: white; font-size: 16px; font-weight: bold;">${hotelName} ${stars}</div>
+              ${nights ? `<div style="color: #94a3b8; font-size: 14px; margin-top: 4px;">${nights} nachten</div>` : ''}
+            </div>`,
+            width: 350,
+            height: 100
+          },
+          start: (index * clipDuration) + overlayLength, // Start after destination name
+          length: overlayLength,
+          position: 'bottomRight',
+          offset: {
+            x: -0.05,
+            y: -0.1
+          },
+          transition: {
+            in: 'fade',
+            out: 'fade'
+          }
+        });
+      }
+    });
+    
+    if (hotelClips.length > 0) {
+      tracks.push({ clips: hotelClips });
+    }
+  }
+
+  // Track 5: Flight info overlays (top, only for first/last destination)
+  if (showFlightOverlay && flights.length > 0) {
+    const flightClips = [];
+    
+    clips.forEach((clip, index) => {
+      const isFirst = index === 0;
+      const isLast = index === clips.length - 1;
+      
+      if (isFirst || isLast) {
+        const flight = findFlightForDestination(clip.destination, isFirst, isLast);
+        if (flight) {
+          const airline = flight.airline || flight.carrier || '';
+          const flightNum = flight.flightNumber || flight.number || '';
+          const departure = flight.departureTime || flight.departure || '';
+          const arrival = flight.arrivalTime || flight.arrival || '';
+          const from = flight.from || flight.origin || '';
+          const to = flight.to || flight.destination || '';
+          
+          let flightText = isFirst ? '✈️ HEENVLUCHT' : '✈️ TERUGVLUCHT';
+          if (airline) flightText += ` • ${airline}`;
+          if (flightNum) flightText += ` ${flightNum}`;
+          
+          flightClips.push({
+            asset: {
+              type: 'html',
+              html: `<div style="font-family: Arial, sans-serif; background: rgba(0,0,0,0.7); padding: 12px 20px; border-radius: 8px; border-left: 4px solid #ec4899;">
+                <div style="color: #f472b6; font-size: 12px; margin-bottom: 4px;">${isFirst ? 'HEENVLUCHT' : 'TERUGVLUCHT'}</div>
+                <div style="color: white; font-size: 16px; font-weight: bold;">${airline} ${flightNum}</div>
+                ${from && to ? `<div style="color: #94a3b8; font-size: 14px; margin-top: 4px;">${from} → ${to}</div>` : ''}
+              </div>`,
+              width: 350,
+              height: 100
+            },
+            start: index * clipDuration,
+            length: overlayLength,
+            position: 'topRight',
+            offset: {
+              x: -0.05,
+              y: 0.1
+            },
+            transition: {
+              in: 'fade',
+              out: 'fade'
+            }
+          });
+        }
+      }
+    });
+    
+    if (flightClips.length > 0) {
+      tracks.push({ clips: flightClips });
+    }
+  }
+
+  // Track 6: Voice-over
   if (voiceoverUrl) {
     tracks.push({
       clips: [{
