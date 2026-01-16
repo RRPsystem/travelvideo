@@ -77,6 +77,9 @@ export default async function handler(req, res) {
     
     console.log('[TC API] Authenticating with microsite:', micrositeId);
     
+    console.log('[TC API] Auth URL:', `${base}${AUTH_PATH}`);
+    console.log('[TC API] Auth body:', JSON.stringify(authBody));
+    
     const authRes = await fetch(`${base}${AUTH_PATH}`, {
       method: 'POST',
       headers: { 
@@ -87,14 +90,22 @@ export default async function handler(req, res) {
     });
     
     const authText = await authRes.text();
+    console.log('[TC API] Auth response status:', authRes.status);
+    console.log('[TC API] Auth response text:', authText.substring(0, 500));
+    
     let authJson;
     try { authJson = JSON.parse(authText); } catch (e) { authJson = null; }
     
     if (!authRes.ok || !authJson?.token) {
-      console.error('[TC API] Auth failed:', authRes.status);
+      console.error('[TC API] Auth failed:', authRes.status, authText);
       return res.status(authRes.status || 500).json({ 
         error: 'Auth failed', 
-        detail: authJson || authText
+        status: authRes.status,
+        detail: authJson || authText,
+        authUrl: `${base}${AUTH_PATH}`,
+        micrositeId: micrositeId,
+        hasUsername: !!username,
+        hasPassword: !!password
       });
     }
     
