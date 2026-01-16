@@ -57,8 +57,8 @@ export default async function handler(req, res) {
     }
 
     const base = TC_API_URL.replace(/\/$/, '');
-    const AUTH_PATH = '/resources/authentication/authenticate';
-    const IDEAS_PATH = '/resources/travelidea';
+    const AUTH_PATH = '/authentication/authenticate';
+    const IDEAS_PATH = '/travelidea';
 
     // Query params
     const { language = 'NL', currency = 'EUR', adults = '2' } = req.query || {};
