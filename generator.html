@@ -1550,20 +1550,24 @@
           });
         });
 
-        // Setup theme buttons - set search query and add as destination
+        // Setup theme buttons - add destination and open MediaPicker
         document.querySelectorAll('.theme-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
-            const theme = btn.dataset.theme;
-            // Set the search input value
-            document.getElementById('customSearch').value = theme;
+            const theme = btn.dataset.theme; // e.g. "drone aerial landscape view"
+            const themeName = btn.textContent.trim(); // e.g. "Drone"
+            
             // Add as a destination if not already present
-            const themeName = btn.textContent.trim();
-            if (!this.destinations.some(d => d.name === themeName)) {
-              this.destinations.push({ name: themeName });
+            let destIndex = this.destinations.findIndex(d => d.name === themeName);
+            if (destIndex === -1) {
+              this.destinations.push({ name: themeName, searchTheme: theme });
+              destIndex = this.destinations.length - 1;
               this.renderDestinations();
             }
+            
+            // Open MediaPicker for this destination with theme as search query
+            this.openClipSearchWithQuery(destIndex, theme);
           });
         });
 
@@ -2217,9 +2221,63 @@
         }
       },
 
+      // Open clip search with custom query (used by theme buttons)
+      async openClipSearchWithQuery(destinationIndex, searchQuery) {
+        this.currentSearchDestination = destinationIndex;
+        
+        // Check if MediaPicker is available
+        if (!window.MediaPicker || !window.MediaPicker.openVideo) {
+          console.error('[VideoStudio] MediaPicker not available');
+          alert('Media Picker niet beschikbaar. Herlaad de pagina.');
+          return;
+        }
+
+        try {
+          // Open MediaPicker in video mode with custom search query
+          const result = await window.MediaPicker.openVideo({
+            defaultTab: 'pexels',
+            searchQuery: searchQuery
+          });
+
+          if (!result) {
+            console.log('[VideoStudio] User cancelled clip selection');
+            return;
+          }
+
+          // Handle single video selection
+          if (result.source === 'pexels' && result.type === 'video') {
+            this.addClipToDestination(destinationIndex, {
+              id: result.id || Date.now(),
+              url: result.videoUrl || result.url,
+              thumbnail: result.thumbnail,
+              duration: result.duration || 5
+            });
+          }
+          
+          // Handle playlist (multiple videos)
+          if (result.type === 'video-playlist' && result.playlist) {
+            result.playlist.forEach(video => {
+              this.addClipToDestination(destinationIndex, {
+                id: video.id || Date.now() + Math.random(),
+                url: video.videoUrl || video.url,
+                thumbnail: video.thumbnail,
+                duration: video.duration || 5
+              });
+            });
+          }
+
+          this.renderDestinations();
+        } catch (error) {
+          console.error('[VideoStudio] Clip search error:', error);
+        }
+      },
+
       async openClipSearch(destinationIndex) {
         this.currentSearchDestination = destinationIndex;
         const dest = this.destinations[destinationIndex];
+        
+        // Use searchTheme if available (from theme buttons), otherwise use destination name
+        const searchQuery = dest.searchTheme || dest.name;
         
         // Check if MediaPicker is available
         if (!window.MediaPicker || !window.MediaPicker.openVideo) {
@@ -2232,7 +2290,7 @@
           // Open MediaPicker in video mode with Pexels tab
           const result = await window.MediaPicker.openVideo({
             defaultTab: 'pexels',
-            searchQuery: dest.name
+            searchQuery: searchQuery
           });
 
           if (!result) {
