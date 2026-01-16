@@ -1,6 +1,8 @@
 {
   "version": 2,
   "name": "ai-travel-video",
+  "buildCommand": "",
+  "outputDirectory": ".",
   "rewrites": [
     {
       "source": "/api/video/status/:id",
