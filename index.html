@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Travel Video - Professionele Reisvideo's</title>
+  <title>AI Travel Video - Professionele Reisvideo's in Minuten</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="/js/media.js"></script>
   <style>
     * {
       margin: 0;
@@ -14,2115 +16,480 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: #0f172a;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
       min-height: 100vh;
-      color: #e2e8f0;
+      color: #fff;
+      overflow-x: hidden;
     }
 
-    /* Sidebar */
-    .sidebar {
+    /* Animated background */
+    .bg-animation {
       position: fixed;
-      left: 0;
       top: 0;
-      bottom: 0;
-      width: 280px;
-      background: #1e293b;
-      border-right: 1px solid #334155;
-      display: flex;
-      flex-direction: column;
-      z-index: 100;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
     }
 
-    .sidebar-header {
-      padding: 24px;
-      border-bottom: 1px solid #334155;
+    .bg-animation::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+      animation: rotate 30s linear infinite;
     }
 
-    .sidebar-header h1 {
-      font-size: 24px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Header */
+    header {
+      padding: 20px 40px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      position: relative;
+      z-index: 10;
     }
 
-    .sidebar-header h1 i {
-      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .sidebar-nav {
-      flex: 1;
-      padding: 16px 0;
-    }
-
-    .nav-item {
+    .logo {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 24px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .logo i {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .nav-links a {
       color: #94a3b8;
       text-decoration: none;
       font-weight: 500;
-      transition: all 0.2s;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    .btn-login {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 24px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 500;
       cursor: pointer;
-      border-left: 3px solid transparent;
-    }
-
-    .nav-item:hover {
-      background: rgba(139, 92, 246, 0.1);
-      color: #e2e8f0;
-    }
-
-    .nav-item.active {
-      background: rgba(139, 92, 246, 0.15);
-      color: #a78bfa;
-      border-left-color: #8b5cf6;
-    }
-
-    .nav-item i {
-      width: 20px;
-      text-align: center;
-    }
-
-    .sidebar-footer {
-      padding: 16px 24px;
-      border-top: 1px solid #334155;
-      font-size: 12px;
-      color: #64748b;
-    }
-
-    /* Main Content */
-    .main-content {
-      margin-left: 280px;
-      min-height: 100vh;
-      padding: 32px;
-    }
-
-    .page-header {
-      margin-bottom: 32px;
-    }
-
-    .page-header h2 {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .page-header p {
-      color: #94a3b8;
-      font-size: 16px;
-    }
-
-    /* Cards */
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .card-header h3 {
-      font-size: 18px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-header h3 i {
-      color: #8b5cf6;
-    }
-
-    /* Video Grid */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .video-card {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      overflow: hidden;
       transition: all 0.3s;
-      cursor: pointer;
     }
 
-    .video-card:hover {
-      border-color: #8b5cf6;
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
+    .btn-login:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .video-card-thumbnail {
-      position: relative;
-      aspect-ratio: 16/9;
-      background: #334155;
-    }
-
-    .video-card-thumbnail img,
-    .video-card-thumbnail video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .video-card-play {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 56px;
-      height: 56px;
-      background: rgba(139, 92, 246, 0.9);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .video-card:hover .video-card-play {
-      opacity: 1;
-    }
-
-    .video-card-play i {
-      color: white;
-      font-size: 20px;
-      margin-left: 4px;
-    }
-
-    .video-card-duration {
-      position: absolute;
-      bottom: 8px;
-      right: 8px;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .video-card-info {
-      padding: 16px;
-    }
-
-    .video-card-title {
-      font-weight: 600;
-      font-size: 15px;
-      margin-bottom: 8px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .video-card-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: #64748b;
-    }
-
-    .video-card-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .video-card-actions button {
-      background: transparent;
-      border: none;
-      color: #64748b;
-      cursor: pointer;
-      padding: 4px;
-      transition: color 0.2s;
-    }
-
-    .video-card-actions button:hover {
-      color: #8b5cf6;
-    }
-
-    /* Empty State */
-    .empty-state {
+    /* Hero Section */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 40px 120px;
       text-align: center;
-      padding: 60px 20px;
-      color: #64748b;
     }
 
-    .empty-state i {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.3;
-    }
-
-    .empty-state h3 {
-      font-size: 20px;
-      margin-bottom: 8px;
-      color: #94a3b8;
-    }
-
-    .empty-state p {
-      margin-bottom: 24px;
-    }
-
-    /* Buttons */
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
+    .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 14px;
+      color: #c4b5fd;
+      margin-bottom: 30px;
+    }
+
+    .hero-badge i {
+      color: #8b5cf6;
+    }
+
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #fff 0%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: #94a3b8;
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
     }
 
     .btn-secondary {
-      background: #334155;
-      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
     }
 
     .btn-secondary:hover {
-      background: #475569;
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .btn-large {
-      padding: 16px 32px;
-      font-size: 16px;
+    /* Features Section */
+    .features {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 40px;
     }
 
-    /* Generator Section */
-    .generator-section {
-      display: none;
-    }
-
-    .generator-section.active {
-      display: block;
-    }
-
-    /* Theme Buttons */
-    .theme-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .theme-btn {
-      padding: 16px;
-      background: #0f172a;
-      border: 2px solid #334155;
-      border-radius: 12px;
-      color: #e2e8f0;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
+    .features h2 {
       text-align: center;
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 60px;
     }
 
-    .theme-btn:hover {
-      border-color: #8b5cf6;
-      background: rgba(139, 92, 246, 0.1);
-    }
-
-    .theme-btn.selected {
-      border-color: #8b5cf6;
-      background: rgba(139, 92, 246, 0.2);
-    }
-
-    .theme-btn .emoji {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    /* Clips Grid */
-    .clips-grid {
+    .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
     }
 
-    .clip-card {
-      position: relative;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid #334155;
-      transition: all 0.2s;
-      cursor: pointer;
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      transition: all 0.3s;
     }
 
-    .clip-card:hover {
-      border-color: #8b5cf6;
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-5px);
     }
 
-    .clip-card.selected {
-      border-color: #22c55e;
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
-    }
-
-    .clip-card img {
-      width: 100%;
-      aspect-ratio: 16/9;
-      object-fit: cover;
-    }
-
-    .clip-card-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 8px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.8));
-      color: white;
-      font-size: 12px;
-    }
-
-    .clip-card-check {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 24px;
-      height: 24px;
-      background: #22c55e;
-      border-radius: 50%;
-      display: none;
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      border-radius: 16px;
+      display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .clip-card.selected .clip-card-check {
-      display: flex;
-    }
-
-    /* Form Elements */
-    .form-group {
+      font-size: 24px;
       margin-bottom: 20px;
     }
 
-    .form-group label {
-      display: block;
+    .feature-card h3 {
+      font-size: 22px;
       font-weight: 600;
-      margin-bottom: 8px;
-      color: #e2e8f0;
-      font-size: 14px;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 12px 16px;
-      background: #0f172a;
-      border: 2px solid #334155;
-      border-radius: 10px;
-      color: #e2e8f0;
-      font-size: 14px;
-      transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: #8b5cf6;
-    }
-
-    .form-control::placeholder {
-      color: #64748b;
-    }
-
-    /* Range Slider */
-    input[type="range"] {
-      width: 100%;
-      height: 6px;
-      border-radius: 5px;
-      background: #334155;
-      outline: none;
-      -webkit-appearance: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #8b5cf6;
-      cursor: pointer;
-    }
-
-    /* Progress */
-    .progress-container {
-      display: none;
-    }
-
-    .progress-container.active {
-      display: block;
-    }
-
-    .progress-bar-wrapper {
-      background: #334155;
-      border-radius: 10px;
-      height: 12px;
-      overflow: hidden;
       margin-bottom: 12px;
     }
 
-    .progress-bar {
-      background: linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%);
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s;
-    }
-
-    .progress-text {
-      text-align: center;
+    .feature-card p {
       color: #94a3b8;
-      font-size: 14px;
+      line-height: 1.6;
     }
 
-    /* Result */
-    .result-container {
-      display: none;
+    /* How it works */
+    .how-it-works {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 40px;
     }
 
-    .result-container.active {
-      display: block;
+    .how-it-works h2 {
+      text-align: center;
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 60px;
     }
 
-    .result-video {
-      width: 100%;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
-    .result-actions {
+    .steps {
       display: flex;
-      gap: 12px;
+      gap: 40px;
+      justify-content: center;
       flex-wrap: wrap;
     }
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
+    .step {
+      text-align: center;
+      max-width: 280px;
+    }
+
+    .step-number {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      border-radius: 50%;
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 auto 20px;
     }
 
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal {
-      background: #1e293b;
-      border-radius: 16px;
-      max-width: 900px;
-      width: 90%;
-      max-height: 90vh;
-      overflow: auto;
-    }
-
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #334155;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h3 {
-      font-size: 18px;
+    .step h3 {
+      font-size: 20px;
       font-weight: 600;
+      margin-bottom: 10px;
     }
 
-    .modal-close {
-      background: transparent;
-      border: none;
+    .step p {
       color: #94a3b8;
-      font-size: 24px;
-      cursor: pointer;
+      line-height: 1.6;
     }
 
-    .modal-body {
-      padding: 24px;
+    /* CTA Section */
+    .cta {
+      max-width: 900px;
+      margin: 80px auto;
+      padding: 60px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 30px;
+      text-align: center;
     }
 
-    .modal-video {
-      width: 100%;
-      border-radius: 12px;
-    }
-
-    /* Search Row */
-    .search-row {
-      display: flex;
-      gap: 12px;
+    .cta h2 {
+      font-size: 36px;
+      font-weight: 700;
       margin-bottom: 16px;
     }
 
-    .search-row input {
-      flex: 1;
+    .cta p {
+      color: #c4b5fd;
+      font-size: 18px;
+      margin-bottom: 30px;
     }
 
-    /* Stats */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .stat-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .stat-card-value {
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .stat-card-label {
-      color: #94a3b8;
-      font-size: 14px;
-      margin-top: 4px;
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes slideUp {
-      from { 
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to { 
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .slide-up {
-      animation: slideUp 0.4s ease-out;
+    footer a {
+      color: #8b5cf6;
+      text-decoration: none;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        border-right: none;
-        border-bottom: 1px solid #334155;
+      .hero h1 {
+        font-size: 40px;
       }
 
-      .sidebar-nav {
-        display: flex;
-        overflow-x: auto;
-        padding: 0;
+      .hero p {
+        font-size: 16px;
       }
 
-      .nav-item {
-        padding: 12px 16px;
-        border-left: none;
-        border-bottom: 3px solid transparent;
-        white-space: nowrap;
-      }
-
-      .nav-item.active {
-        border-bottom-color: #8b5cf6;
-        border-left-color: transparent;
-      }
-
-      .sidebar-footer {
+      .nav-links {
         display: none;
       }
 
-      .main-content {
-        margin-left: 0;
+      header {
         padding: 20px;
       }
-    }
 
-    /* Media Picker Dark Theme Styles */
-    .mp-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      z-index: 9998;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .mp-overlay.open { opacity: 1; }
-    .mp-drawer {
-      position: fixed;
-      top: 0;
-      right: -500px;
-      width: 480px;
-      max-width: 100vw;
-      height: 100%;
-      background: #0f172a;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      transition: right 0.25s ease-out;
-      box-shadow: -8px 0 40px rgba(0,0,0,0.5);
-      border-left: 1px solid #334155;
-    }
-    .mp-drawer.open { right: 0; }
-    
-    .mp-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #334155;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #1e293b;
-    }
-    .mp-header h3 { 
-      margin: 0; 
-      font-size: 18px; 
-      font-weight: 600;
-      color: #e2e8f0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .mp-header h3::before {
-      content: '🎬';
-    }
-    .mp-close {
-      background: #334155;
-      border: none;
-      color: #94a3b8;
-      font-size: 18px;
-      cursor: pointer;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .mp-close:hover {
-      background: #475569;
-      color: #e2e8f0;
-    }
-    
-    .mp-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      background: #0f172a;
-    }
-    
-    /* Tabs */
-    .media-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #334155;
-    }
-    .media-tabs .tab-btn {
-      padding: 10px 16px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #94a3b8;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .media-tabs .tab-btn:hover { 
-      background: #334155; 
-      color: #e2e8f0;
-      border-color: #475569;
-    }
-    .media-tabs .tab-btn.active { 
-      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-      color: white;
-      border-color: transparent;
-    }
-    
-    /* Search Row */
-    .mp-row { 
-      display: flex; 
-      gap: 10px; 
-      margin-bottom: 16px; 
-    }
-    .mp-row input[type="text"],
-    .mp-body input[type="text"] {
-      flex: 1;
-      padding: 12px 16px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #e2e8f0;
-      font-size: 14px;
-    }
-    .mp-row input[type="text"]:focus,
-    .mp-body input[type="text"]:focus {
-      outline: none;
-      border-color: #8b5cf6;
-    }
-    .mp-row input[type="text"]::placeholder,
-    .mp-body input[type="text"]::placeholder {
-      color: #64748b;
-    }
-    
-    /* Buttons in MediaPicker */
-    .mp-body .btn {
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-    }
-    .mp-body .btn-primary {
-      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-      color: white;
-    }
-    .mp-body .btn-primary:hover {
-      opacity: 0.9;
-    }
-    .mp-body .btn-success {
-      background: #22c55e;
-      color: white;
-    }
-    .mp-body .btn-lg {
-      padding: 12px 20px;
-    }
-    
-    /* Help text */
-    .mp-help {
-      color: #64748b;
-      font-size: 13px;
-      margin-top: 8px;
-    }
-    .mp-body .mp-help,
-    .mp-body > div[style*="background: #f0fdf4"],
-    .mp-body > div[style*="background: #fefce8"] {
-      background: #1e293b !important;
-      border-left-color: #8b5cf6 !important;
-      color: #94a3b8 !important;
-      border-radius: 8px;
-      padding: 12px !important;
-    }
-    .mp-body > div[style*="background: #f0fdf4"] strong,
-    .mp-body > div[style*="background: #fefce8"] strong {
-      color: #a78bfa !important;
-    }
-    
-    /* Grid */
-    .pexels-grid,
-    .storyblocks-grid,
-    .unsplash-grid,
-    .my-videos-grid {
-      display: grid !important;
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 12px !important;
-      margin-top: 16px;
-    }
-    
-    /* Video tiles */
-    .pexels-grid > div,
-    .storyblocks-grid > div {
-      background: #1e293b !important;
-      border: 1px solid #334155 !important;
-      border-radius: 10px !important;
-      overflow: hidden;
-      transition: all 0.2s !important;
-    }
-    .pexels-grid > div:hover,
-    .storyblocks-grid > div:hover {
-      border-color: #8b5cf6 !important;
-      transform: translateY(-2px) !important;
-      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2) !important;
-    }
-    
-    /* Thumbnails */
-    .mp-thumb {
-      width: 100%;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .mp-thumb:hover { transform: scale(1.02); }
-    
-    /* Notes and counters */
-    .pexels-note,
-    .storyblocks-note,
-    .unsplash-note {
-      color: #64748b !important;
-      font-size: 13px;
-    }
-    .pexels-selected-count,
-    .storyblocks-selected-count {
-      color: #a78bfa !important;
-    }
-    
-    /* More row */
-    .mp-more-row {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #334155;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    /* Tab content styling */
-    .tab-content {
-      color: #e2e8f0;
-    }
-    .tab-content p {
-      color: #94a3b8;
-    }
-    
-    /* File input styling */
-    .tab-content input[type="file"] {
-      background: #1e293b;
-      border: 2px dashed #334155;
-      border-radius: 8px;
-      padding: 20px;
-      width: 100%;
-      color: #94a3b8;
-    }
-    
-    /* Error messages */
-    .mp-body div[style*="color:#c00"],
-    .mp-body div[style*="color: #c00"] {
-      color: #f87171 !important;
-      background: rgba(239, 68, 68, 0.1);
-      padding: 16px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    
-    /* Fix white area - override inline styles */
-    .mp-body div[style*="background:#fff"],
-    .mp-body div[style*="background: #fff"],
-    .mp-body div[style*="background:white"],
-    .mp-body div[style*="background: white"],
-    .mp-body > div:first-child {
-      background: transparent !important;
-    }
-    
-    /* Tab content backgrounds */
-    .tab-content[data-tab] {
-      background: transparent !important;
-    }
-    
-    /* Multi-select info box */
-    .mp-body div[style*="border-left: 4px"] {
-      background: #1e293b !important;
-      border-left-color: #8b5cf6 !important;
-      color: #94a3b8 !important;
-      border-radius: 8px;
-      padding: 12px 16px !important;
-    }
-    
-    /* All buttons in MediaPicker */
-    .mp-body button {
-      background: #334155 !important;
-      border: 1px solid #475569 !important;
-      color: #e2e8f0 !important;
-      border-radius: 8px !important;
-      padding: 10px 16px !important;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .mp-body button:hover {
-      background: #475569 !important;
-    }
-    .mp-body button.btn-primary,
-    .mp-body button[style*="background: #667eea"],
-    .mp-body button[style*="background:#667eea"] {
-      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-      border: none !important;
-      color: white !important;
-    }
-    .mp-body button.btn-success,
-    .mp-body button[style*="background: #22c55e"],
-    .mp-body button[style*="background:#22c55e"],
-    .mp-body button[style*="background: #10b981"] {
-      background: #22c55e !important;
-      border: none !important;
-      color: white !important;
-    }
-    
-    /* Search button specifically */
-    .mp-body button[style*="background: #667eea"] {
-      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+      .hero {
+        padding: 40px 20px 80px;
+      }
+
+      .features, .how-it-works {
+        padding: 40px 20px;
+      }
+
+      .cta {
+        margin: 40px 20px;
+        padding: 40px 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <nav class="sidebar">
-    <div class="sidebar-header">
-      <h1><i class="fas fa-video"></i> AI Travel Video</h1>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-item active" data-section="library">
-        <i class="fas fa-film"></i>
-        <span>Mijn Video's</span>
-      </div>
-      <div class="nav-item" data-section="generator">
-        <i class="fas fa-magic"></i>
-        <span>Nieuwe Video</span>
-      </div>
-      <div class="nav-item" data-section="settings">
-        <i class="fas fa-cog"></i>
-        <span>Instellingen</span>
-      </div>
-    </div>
-    <div class="sidebar-footer">
-      <div>AI Travel Video v1.0</div>
-      <div style="margin-top: 4px;">Powered by Shotstack & Pexels</div>
-    </div>
-  </nav>
+  <div class="bg-animation"></div>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- Library Section -->
-    <section id="library-section" class="section active">
-      <div class="page-header">
-        <h2>Mijn Video's</h2>
-        <p>Bekijk en beheer je gegenereerde video's</p>
-      </div>
+  <header>
+    <div class="logo">
+      <i class="fas fa-video"></i>
+      <span>AI Travel Video</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">Hoe het werkt</a>
+      <a href="#pricing">Prijzen</a>
+      <button class="btn-login">Inloggen</button>
+    </nav>
+  </header>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-card-value" id="totalVideos">0</div>
-          <div class="stat-card-label">Totaal video's</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-value" id="totalDuration">0:00</div>
-          <div class="stat-card-label">Totale duur</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-value" id="totalSize">0 MB</div>
-          <div class="stat-card-label">Totale grootte</div>
-        </div>
+  <main>
+    <section class="hero">
+      <div class="hero-badge">
+        <i class="fas fa-sparkles"></i>
+        <span>Powered by AI</span>
       </div>
+      <h1>Maak Professionele Reisvideo's in Minuten</h1>
+      <p>Transformeer je reisbestemmingen naar prachtige video's met AI. Selecteer clips, voeg muziek toe en genereer automatisch een professionele video.</p>
+      <div class="hero-buttons">
+        <a href="/generator" class="btn-primary">
+          <i class="fas fa-play"></i>
+          Start Nu Gratis
+        </a>
+        <a href="#how-it-works" class="btn-secondary">
+          <i class="fas fa-info-circle"></i>
+          Meer Info
+        </a>
+      </div>
+    </section>
 
-      <div class="card">
-        <div class="card-header">
-          <h3><i class="fas fa-photo-video"></i> Video Bibliotheek</h3>
-          <button class="btn btn-primary" onclick="VideoStudio.showSection('generator')">
-            <i class="fas fa-plus"></i> Nieuwe Video
-          </button>
-        </div>
-        <div id="videoGrid" class="video-grid">
-          <div class="empty-state">
-            <i class="fas fa-film"></i>
-            <h3>Nog geen video's</h3>
-            <p>Maak je eerste video met de AI Video Generator</p>
-            <button class="btn btn-primary btn-large" onclick="VideoStudio.showSection('generator')">
-              <i class="fas fa-magic"></i> Maak Video
-            </button>
+    <section class="features" id="features">
+      <h2>Waarom AI Travel Video?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-wand-magic-sparkles"></i>
           </div>
+          <h3>AI-Powered</h3>
+          <p>Onze AI selecteert automatisch de beste clips en beelden voor elke bestemming op basis van je reis.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h3>Supersnel</h3>
+          <p>Genereer een professionele video in slechts enkele minuten in plaats van uren bewerken.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-photo-film"></i>
+          </div>
+          <h3>Premium Content</h3>
+          <p>Toegang tot miljoenen royalty-free video's en afbeeldingen van Pexels, Unsplash en Storyblocks.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-music"></i>
+          </div>
+          <h3>Muziek & Voice-over</h3>
+          <p>Voeg achtergrondmuziek en professionele voice-overs toe aan je video's.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-route"></i>
+          </div>
+          <h3>Rondreis Import</h3>
+          <p>Importeer direct je rondreis uit Travel Compositor en genereer automatisch video's per bestemming.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-download"></i>
+          </div>
+          <h3>HD Export</h3>
+          <p>Download je video's in Full HD kwaliteit, klaar om te delen op social media of je website.</p>
         </div>
       </div>
     </section>
 
-    <!-- Generator Section -->
-    <section id="generator-section" class="section" style="display: none;">
-      <div class="page-header">
-        <h2>Nieuwe Video Maken</h2>
-        <p>Selecteer clips en genereer een professionele video</p>
-      </div>
-
-      <!-- Rondreis Planner Import -->
-      <div class="card slide-up" style="border: 2px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);">
-        <div class="card-header">
-          <h3><i class="fas fa-download"></i> Rondreis Planner Import</h3>
+    <section class="how-it-works" id="how-it-works">
+      <h2>Hoe het werkt</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Importeer je Reis</h3>
+          <p>Voer je Travel Compositor ID in of voeg handmatig bestemmingen toe.</p>
         </div>
-        <p style="color: #94a3b8; margin-bottom: 16px;">
-          Heb je een reis in Rondreis Planner? Importeer de bestemmingen automatisch!
-        </p>
-        <div class="search-row">
-          <input type="text" id="travelIdInput" class="form-control" placeholder="Rondreis Planner ID (bijv. abc123)">
-          <button class="btn btn-primary" onclick="VideoStudio.importTravelId()">
-            <i class="fas fa-download"></i> Importeren
-          </button>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Selecteer Clips</h3>
+          <p>Kies uit duizenden video's en afbeeldingen voor elke bestemming.</p>
         </div>
-        <div id="importStatus" style="margin-top: 12px; font-size: 14px;"></div>
-        <div id="importedDestinations" style="margin-top: 16px; display: none;">
-          <label style="font-weight: 600; margin-bottom: 8px; display: block;">Geïmporteerde bestemmingen:</label>
-          <div id="destinationTags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Genereer Video</h3>
+          <p>Klik op genereren en ontvang binnen minuten je professionele reisvideo.</p>
         </div>
-      </div>
-
-      <!-- Step 1: Title & Theme -->
-      <div class="card slide-up">
-        <div class="card-header">
-          <h3><i class="fas fa-heading"></i> Stap 1: Titel & Thema</h3>
-        </div>
-        <div class="form-group">
-          <label>Video Titel</label>
-          <input type="text" id="videoTitle" class="form-control" placeholder="Bijv. Mijn Vakantie Video, Roadtrip 2024..." value="Mijn Video">
-        </div>
-        <div class="form-group">
-          <label>Kies een thema</label>
-          <div class="theme-grid">
-            <button class="theme-btn" data-theme="safari wildlife africa">
-              <span class="emoji">🦁</span>
-              Safari
-            </button>
-            <button class="theme-btn" data-theme="skiing snow mountains winter">
-              <span class="emoji">⛷️</span>
-              Skiën
-            </button>
-            <button class="theme-btn" data-theme="hiking mountains trail nature">
-              <span class="emoji">🥾</span>
-              Hiking
-            </button>
-            <button class="theme-btn" data-theme="mountain biking cycling trail">
-              <span class="emoji">🚵</span>
-              Mountain Bike
-            </button>
-            <button class="theme-btn" data-theme="cruise ship ocean sailing">
-              <span class="emoji">🚢</span>
-              Cruise
-            </button>
-            <button class="theme-btn" data-theme="road trip car driving highway">
-              <span class="emoji">🚗</span>
-              Roadtrip
-            </button>
-            <button class="theme-btn" data-theme="tropical beach paradise ocean">
-              <span class="emoji">🏝️</span>
-              Tropisch
-            </button>
-            <button class="theme-btn" data-theme="city urban architecture skyline">
-              <span class="emoji">🏙️</span>
-              Stad
-            </button>
-            <button class="theme-btn" data-theme="food cooking restaurant cuisine">
-              <span class="emoji">🍽️</span>
-              Food
-            </button>
-            <button class="theme-btn" data-theme="sunset sunrise golden hour">
-              <span class="emoji">🌅</span>
-              Sunset
-            </button>
-            <button class="theme-btn" data-theme="drone aerial landscape view">
-              <span class="emoji">🚁</span>
-              Drone
-            </button>
-            <button class="theme-btn" data-theme="nature forest trees green">
-              <span class="emoji">🌲</span>
-              Natuur
-            </button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Of zoek zelf</label>
-          <div class="search-row">
-            <input type="text" id="customSearch" class="form-control" placeholder="Bijv. Amsterdam, Paris, beach sunset...">
-            <button class="btn btn-primary" onclick="VideoStudio.searchClips()">
-              <i class="fas fa-search"></i> Zoeken
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Select Clips per Destination -->
-      <div class="card slide-up">
-        <div class="card-header">
-          <h3><i class="fas fa-film"></i> Stap 2: Video Clips per Bestemming</h3>
-          <span id="selectedCount" style="color: #22c55e; font-weight: 600;">0 clips geselecteerd</span>
-        </div>
-        
-        <!-- Destinations Grid -->
-        <div id="destinationsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
-          <!-- Destinations will be rendered here -->
-        </div>
-        
-        <!-- Add Destination Button -->
-        <div id="addDestinationCard" style="border: 2px dashed #475569; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;" onclick="VideoStudio.addDestination()">
-          <i class="fas fa-plus-circle" style="font-size: 32px; color: #8b5cf6; margin-bottom: 8px;"></i>
-          <div style="font-weight: 600; color: #e2e8f0;">Voeg bestemming toe</div>
-          <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Handmatig een gebied toevoegen</div>
-        </div>
-      </div>
-
-      <!-- Step 3: Settings -->
-      <div class="card slide-up">
-        <div class="card-header">
-          <h3><i class="fas fa-sliders-h"></i> Stap 3: Instellingen</h3>
-        </div>
-        <div class="form-group">
-          <label>Duur per clip: <span id="durationValue">5</span> seconden</label>
-          <input type="range" id="clipDuration" min="2" max="15" value="5" step="0.5">
-        </div>
-        <div class="form-group">
-          <label>Voice-over (optioneel)</label>
-          <div style="display: flex; gap: 12px; align-items: center;">
-            <input type="file" id="voiceoverInput" accept="audio/*" style="display: none;">
-            <button class="btn btn-secondary" onclick="document.getElementById('voiceoverInput').click()">
-              <i class="fas fa-microphone"></i> Upload Audio
-            </button>
-            <span id="voiceoverStatus" style="color: #94a3b8; font-size: 14px;"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Generate Button -->
-      <div style="text-align: center; margin: 32px 0;">
-        <button id="generateBtn" class="btn btn-primary btn-large" onclick="VideoStudio.generateVideo()">
-          <i class="fas fa-magic"></i> Genereer Video
-        </button>
-      </div>
-
-      <!-- Progress -->
-      <div id="progressContainer" class="card progress-container">
-        <div class="card-header">
-          <h3><i class="fas fa-spinner fa-spin"></i> Video wordt gegenereerd...</h3>
-        </div>
-        <div class="progress-bar-wrapper">
-          <div id="progressBar" class="progress-bar"></div>
-        </div>
-        <div id="progressText" class="progress-text">Voorbereiden...</div>
-      </div>
-
-      <!-- Result -->
-      <div id="resultContainer" class="card result-container">
-        <div class="card-header">
-          <h3 style="color: #22c55e;"><i class="fas fa-check-circle"></i> Video is klaar!</h3>
-        </div>
-        <video id="resultVideo" class="result-video" controls></video>
-        <div class="form-group">
-          <label>Video naam voor opslag</label>
-          <input type="text" id="saveVideoName" class="form-control" placeholder="Naam voor je video">
-        </div>
-        <div class="result-actions">
-          <button class="btn btn-primary" onclick="VideoStudio.saveVideo()">
-            <i class="fas fa-save"></i> Opslaan naar Bibliotheek
-          </button>
-          <a id="downloadBtn" class="btn btn-secondary" download>
-            <i class="fas fa-download"></i> Download
-          </a>
-          <button class="btn btn-secondary" onclick="VideoStudio.resetGenerator()">
-            <i class="fas fa-redo"></i> Nieuwe Video
-          </button>
-        </div>
-        <div id="saveStatus" style="margin-top: 12px; font-size: 14px;"></div>
       </div>
     </section>
 
-    <!-- Settings Section -->
-    <section id="settings-section" class="section" style="display: none;">
-      <div class="page-header">
-        <h2>Instellingen</h2>
-        <p>AI Travel Video configuratie</p>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3><i class="fas fa-key"></i> API Configuratie</h3>
-        </div>
-        <div style="background: #0f172a; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-          <p style="color: #22c55e; margin-bottom: 12px;">
-            <i class="fas fa-check-circle"></i> <strong>Server-side API keys actief</strong>
-          </p>
-          <p style="color: #94a3b8; font-size: 14px; margin-bottom: 8px;">
-            De volgende API's zijn geconfigureerd in Vercel:
-          </p>
-          <ul style="color: #94a3b8; font-size: 14px; margin-left: 20px; line-height: 1.8;">
-            <li><strong>Pexels</strong> - Video clips zoeken</li>
-            <li><strong>Shotstack</strong> - Video rendering</li>
-            <li><strong>Storyblocks</strong> - Premium video's</li>
-            <li><strong>Unsplash</strong> - Afbeeldingen</li>
-            <li><strong>Blob Storage</strong> - Video opslag</li>
-          </ul>
-        </div>
-        <p style="color: #64748b; font-size: 13px;">
-          <i class="fas fa-info-circle"></i> API keys worden beheerd in de Vercel dashboard onder Environment Variables.
-        </p>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3><i class="fas fa-database"></i> Video Opslag</h3>
-        </div>
-        <p style="color: #94a3b8; margin-bottom: 16px;">
-          Video's worden automatisch opgeslagen in Vercel Blob Storage wanneer je op "Opslaan naar Bibliotheek" klikt.
-        </p>
-        <div style="display: flex; gap: 12px;">
-          <button class="btn btn-secondary" onclick="VideoStudio.loadVideos(); VideoStudio.showSection('library');">
-            <i class="fas fa-sync-alt"></i> Ververs Bibliotheek
-          </button>
-          <button class="btn btn-secondary" onclick="VideoStudio.clearCache()">
-            <i class="fas fa-trash"></i> Cache Wissen
-          </button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3><i class="fas fa-info-circle"></i> Over AI Travel Video</h3>
-        </div>
-        <div style="color: #94a3b8; font-size: 14px; line-height: 1.8;">
-          <p><strong>AI Travel Video v1.0</strong></p>
-          <p>Standalone video generator voor het maken van professionele promotievideo's.</p>
-          <br>
-          <p><strong>Features:</strong></p>
-          <ul style="margin-left: 20px;">
-            <li>Travel Compositor import</li>
-            <li>12+ thema's voor video clips</li>
-            <li>Pexels & Storyblocks integratie</li>
-            <li>Voice-over ondersteuning</li>
-            <li>Automatische video opslag</li>
-          </ul>
-        </div>
-      </div>
+    <section class="cta">
+      <h2>Klaar om te beginnen?</h2>
+      <p>Maak vandaag nog je eerste professionele reisvideo.</p>
+      <a href="/generator" class="btn-primary">
+        <i class="fas fa-rocket"></i>
+        Start de Video Generator
+      </a>
     </section>
   </main>
 
-  <!-- Video Preview Modal -->
-  <div id="videoModal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="modalTitle">Video Preview</h3>
-        <button class="modal-close" onclick="VideoStudio.closeModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <video id="modalVideo" class="modal-video" controls></video>
-        <div style="margin-top: 16px; display: flex; gap: 12px;">
-          <a id="modalDownload" class="btn btn-primary" download>
-            <i class="fas fa-download"></i> Download
-          </a>
-          <button class="btn btn-secondary" onclick="VideoStudio.deleteVideo()">
-            <i class="fas fa-trash"></i> Verwijderen
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Video Studio App
-    const VideoStudio = {
-      videos: [],
-      selectedClips: [],
-      currentVideoId: null,
-      voiceoverUrl: null,
-      renderId: null,
-      statusInterval: null,
-
-      init() {
-        
-        // Setup navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-          item.addEventListener('click', () => {
-            const section = item.dataset.section;
-            this.showSection(section);
-          });
-        });
-
-        // Setup theme buttons
-        document.querySelectorAll('.theme-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            const theme = btn.dataset.theme;
-            this.searchClips(theme);
-          });
-        });
-
-        // Setup duration slider
-        const durationSlider = document.getElementById('clipDuration');
-        const durationValue = document.getElementById('durationValue');
-        durationSlider.addEventListener('input', () => {
-          durationValue.textContent = durationSlider.value;
-        });
-
-        // Setup voiceover upload
-        document.getElementById('voiceoverInput').addEventListener('change', (e) => {
-          this.handleVoiceoverUpload(e);
-        });
-
-        // Setup custom search enter key
-        document.getElementById('customSearch').addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') this.searchClips();
-        });
-
-        // Setup travel ID import enter key
-        document.getElementById('travelIdInput').addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') this.importTravelId();
-        });
-
-        // Load videos and render initial destinations
-        this.loadVideos();
-        this.renderDestinations();
-      },
-
-      showSection(section) {
-        // Update nav
-        document.querySelectorAll('.nav-item').forEach(item => {
-          item.classList.toggle('active', item.dataset.section === section);
-        });
-
-        // Update sections
-        document.querySelectorAll('.section').forEach(sec => {
-          sec.style.display = 'none';
-        });
-        document.getElementById(`${section}-section`).style.display = 'block';
-
-        // Reload videos when showing library
-        if (section === 'library') {
-          this.loadVideos();
-        }
-      },
-
-      clearCache() {
-        localStorage.removeItem('videoStudioCache');
-        alert('Cache gewist!');
-      },
-
-      async loadVideos() {
-        const grid = document.getElementById('videoGrid');
-        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i><p style="margin-top: 12px;">Laden...</p></div>';
-
-        try {
-          const response = await fetch('/api/videos/list');
-          const data = await response.json();
-
-          if (data.success && data.videos && data.videos.length > 0) {
-            this.videos = data.videos;
-            this.renderVideos();
-            this.updateStats();
-          } else {
-            grid.innerHTML = `
-              <div class="empty-state">
-                <i class="fas fa-film"></i>
-                <h3>Nog geen video's</h3>
-                <p>Maak je eerste video met de AI Video Generator</p>
-                <button class="btn btn-primary btn-large" onclick="VideoStudio.showSection('generator')">
-                  <i class="fas fa-magic"></i> Maak Video
-                </button>
-              </div>
-            `;
-          }
-        } catch (error) {
-          console.error('Load videos error:', error);
-          grid.innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-exclamation-triangle"></i>
-              <h3>Fout bij laden</h3>
-              <p>${error.message}</p>
-              <button class="btn btn-secondary" onclick="VideoStudio.loadVideos()">
-                <i class="fas fa-redo"></i> Opnieuw proberen
-              </button>
-            </div>
-          `;
-        }
-      },
-
-      renderVideos() {
-        const grid = document.getElementById('videoGrid');
-        
-        if (this.videos.length === 0) {
-          grid.innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-film"></i>
-              <h3>Nog geen video's</h3>
-              <p>Maak je eerste video met de AI Video Generator</p>
-              <button class="btn btn-primary btn-large" onclick="VideoStudio.showSection('generator')">
-                <i class="fas fa-magic"></i> Maak Video
-              </button>
-            </div>
-          `;
-          return;
-        }
-
-        grid.innerHTML = this.videos.map(video => `
-          <div class="video-card" onclick="VideoStudio.openVideo('${video.id}')">
-            <div class="video-card-thumbnail">
-              <img src="${video.thumbnail || video.videoUrl}" alt="${video.title}" onerror="this.style.display='none'">
-              <div class="video-card-play">
-                <i class="fas fa-play"></i>
-              </div>
-              ${video.duration ? `<div class="video-card-duration">${this.formatDuration(video.duration)}</div>` : ''}
-            </div>
-            <div class="video-card-info">
-              <div class="video-card-title">${video.title}</div>
-              <div class="video-card-meta">
-                <span>${this.formatDate(video.createdAt)}</span>
-                <div class="video-card-actions">
-                  <button onclick="event.stopPropagation(); VideoStudio.downloadVideo('${video.videoUrl}', '${video.title}')" title="Download">
-                    <i class="fas fa-download"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `).join('');
-      },
-
-      updateStats() {
-        document.getElementById('totalVideos').textContent = this.videos.length;
-        
-        const totalDuration = this.videos.reduce((sum, v) => sum + (v.duration || 0), 0);
-        document.getElementById('totalDuration').textContent = this.formatDuration(totalDuration);
-        
-        const totalSize = this.videos.reduce((sum, v) => sum + (v.size || 0), 0);
-        document.getElementById('totalSize').textContent = this.formatSize(totalSize);
-      },
-
-      formatDuration(seconds) {
-        if (!seconds) return '0:00';
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-      },
-
-      formatDate(dateStr) {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
-      },
-
-      formatSize(bytes) {
-        if (!bytes) return '0 MB';
-        const mb = bytes / (1024 * 1024);
-        return mb.toFixed(1) + ' MB';
-      },
-
-      openVideo(videoId) {
-        const video = this.videos.find(v => v.id === videoId);
-        if (!video) return;
-
-        this.currentVideoId = videoId;
-        document.getElementById('modalTitle').textContent = video.title;
-        document.getElementById('modalVideo').src = video.videoUrl;
-        document.getElementById('modalDownload').href = video.videoUrl;
-        document.getElementById('modalDownload').download = `${video.title}.mp4`;
-        document.getElementById('videoModal').classList.add('active');
-      },
-
-      closeModal() {
-        document.getElementById('videoModal').classList.remove('active');
-        document.getElementById('modalVideo').pause();
-        this.currentVideoId = null;
-      },
-
-      downloadVideo(url, title) {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${title}.mp4`;
-        a.click();
-      },
-
-      async deleteVideo() {
-        if (!this.currentVideoId) return;
-        
-        if (!confirm('Weet je zeker dat je deze video wilt verwijderen?')) return;
-
-        const video = this.videos.find(v => v.id === this.currentVideoId);
-        if (!video) return;
-
-        try {
-          // Try to delete from Blob storage
-          const response = await fetch('/api/videos/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ videoUrl: video.videoUrl, videoId: video.id })
-          });
-
-          if (!response.ok) {
-            console.warn('Could not delete from storage, removing from local list only');
-          }
-        } catch (error) {
-          console.warn('Delete API error:', error);
-        }
-
-        // Remove from local list
-        this.videos = this.videos.filter(v => v.id !== this.currentVideoId);
-        this.closeModal();
-        this.renderVideos();
-        this.updateStats();
-      },
-
-      async searchClips(query) {
-        const searchInput = document.getElementById('customSearch');
-        const searchQuery = query || searchInput.value.trim();
-        
-        if (!searchQuery) {
-          alert('Voer een zoekterm in');
-          return;
-        }
-
-        const grid = document.getElementById('clipsGrid');
-        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8; grid-column: 1/-1;"><i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i><p style="margin-top: 12px;">Zoeken...</p></div>';
-
-        try {
-          // Use server-side API route (uses Vercel env vars in production)
-          const response = await fetch(`/api/pexels/search?query=${encodeURIComponent(searchQuery)}&per_page=20&orientation=landscape`);
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.error || data.detail || 'Zoeken mislukt');
-          }
-
-          if (data.videos && data.videos.length > 0) {
-            this.renderClips(data.videos);
-          } else {
-            grid.innerHTML = `
-              <div class="empty-state" style="grid-column: 1/-1;">
-                <i class="fas fa-search"></i>
-                <h3>Geen resultaten</h3>
-                <p>Probeer een andere zoekterm</p>
-              </div>
-            `;
-          }
-        } catch (error) {
-          console.error('Search error:', error);
-          grid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1;">
-              <i class="fas fa-exclamation-triangle"></i>
-              <h3>Zoeken mislukt</h3>
-              <p>${error.message}</p>
-            </div>
-          `;
-        }
-      },
-
-      renderClips(videos) {
-        const grid = document.getElementById('clipsGrid');
-        
-        grid.innerHTML = videos.map(video => {
-          const hdFile = video.video_files.find(f => f.quality === 'hd' && f.width >= 1280) || video.video_files[0];
-          const isSelected = this.selectedClips.some(c => c.id === video.id);
-          
-          return `
-            <div class="clip-card ${isSelected ? 'selected' : ''}" data-id="${video.id}" onclick="VideoStudio.toggleClip(${video.id}, '${hdFile.link}', '${video.image}', ${video.duration})">
-              <img src="${video.image}" alt="">
-              <div class="clip-card-overlay">
-                ${Math.round(video.duration)}s
-              </div>
-              <div class="clip-card-check">
-                <i class="fas fa-check" style="color: white; font-size: 12px;"></i>
-              </div>
-            </div>
-          `;
-        }).join('');
-      },
-
-      toggleClip(id, url, thumbnail, duration) {
-        const index = this.selectedClips.findIndex(c => c.id === id);
-        
-        if (index >= 0) {
-          this.selectedClips.splice(index, 1);
-        } else {
-          this.selectedClips.push({ id, url, thumbnail, duration });
-        }
-
-        // Update UI
-        const card = document.querySelector(`.clip-card[data-id="${id}"]`);
-        if (card) {
-          card.classList.toggle('selected', index < 0);
-        }
-
-        document.getElementById('selectedCount').textContent = `${this.selectedClips.length} clips geselecteerd`;
-      },
-
-      async handleVoiceoverUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const status = document.getElementById('voiceoverStatus');
-        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploaden...';
-
-        try {
-          const formData = new FormData();
-          formData.append('voiceover', file);
-
-          const response = await fetch('/api/video/upload-voiceover', {
-            method: 'POST',
-            body: formData
-          });
-
-          if (!response.ok) throw new Error('Upload mislukt');
-
-          const result = await response.json();
-          this.voiceoverUrl = result.url;
-          status.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> ${file.name}`;
-        } catch (error) {
-          console.error('Voiceover upload error:', error);
-          status.innerHTML = `<i class="fas fa-exclamation-circle" style="color: #ef4444;"></i> Upload mislukt`;
-        }
-      },
-
-      async generateVideo() {
-        if (this.selectedClips.length === 0) {
-          alert('Selecteer eerst video clips voor je bestemmingen');
-          return;
-        }
-
-        const title = document.getElementById('videoTitle').value.trim() || 'Mijn Video';
-        const clipDuration = parseFloat(document.getElementById('clipDuration').value);
-
-        // Show progress
-        document.getElementById('progressContainer').classList.add('active');
-        document.getElementById('generateBtn').disabled = true;
-        document.getElementById('generateBtn').style.opacity = '0.5';
-
-        try {
-          // Build payload with clips organized by destination
-          const payload = {
-            destinations: this.destinations.map(d => ({ name: d.name })),
-            clips: this.selectedClips.map(clip => ({
-              url: clip.url,
-              destination: clip.destinationName || 'Clip',
-              duration: clip.duration,
-              thumbnail: clip.thumbnail
-            })),
-            title: title,
-            voiceoverUrl: this.voiceoverUrl,
-            clipDuration: clipDuration
-          };
-
-          const response = await fetch('/api/video/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Video generatie mislukt');
-          }
-
-          const result = await response.json();
-          this.renderId = result.renderId;
-
-          // Start polling
-          this.pollStatus();
-
-        } catch (error) {
-          console.error('Generate error:', error);
-          alert('Fout: ' + error.message);
-          this.resetGenerator();
-        }
-      },
-
-      pollStatus() {
-        this.statusInterval = setInterval(async () => {
-          try {
-            const response = await fetch(`/api/video/status/${this.renderId}`);
-            const status = await response.json();
-
-            document.getElementById('progressBar').style.width = `${status.progress}%`;
-            document.getElementById('progressText').textContent = status.message;
-
-            if (status.status === 'done') {
-              clearInterval(this.statusInterval);
-              this.showResult(status.url);
-            } else if (status.status === 'failed') {
-              clearInterval(this.statusInterval);
-              alert('Video generatie mislukt: ' + (status.error || 'Onbekende fout'));
-              this.resetGenerator();
-            }
-          } catch (error) {
-            console.error('Status check error:', error);
-          }
-        }, 3000);
-      },
-
-      showResult(videoUrl) {
-        document.getElementById('progressContainer').classList.remove('active');
-        document.getElementById('resultContainer').classList.add('active');
-        document.getElementById('resultVideo').src = videoUrl;
-        document.getElementById('downloadBtn').href = videoUrl;
-        document.getElementById('saveVideoName').value = document.getElementById('videoTitle').value;
-      },
-
-      async saveVideo() {
-        const videoElement = document.getElementById('resultVideo');
-        const videoName = document.getElementById('saveVideoName').value.trim() || 'Untitled Video';
-        const saveStatus = document.getElementById('saveStatus');
-
-        if (!videoElement.src) {
-          saveStatus.innerHTML = '<span style="color: #ef4444;"><i class="fas fa-exclamation-circle"></i> Geen video om op te slaan</span>';
-          return;
-        }
-
-        saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Opslaan...</span>';
-
-        try {
-          // Fetch video as blob
-          const videoBlob = await fetch(videoElement.src).then(r => r.blob());
-          
-          // Convert to base64
-          const base64Video = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(videoBlob);
-          });
-
-          // Upload to storage
-          const response = await fetch('/api/videos/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              videoData: base64Video,
-              title: videoName,
-              type: 'ai-generated',
-              duration: videoElement.duration || 0,
-              width: videoElement.videoWidth || 1920,
-              height: videoElement.videoHeight || 1080
-            })
-          });
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Upload mislukt');
-          }
-
-          const result = await response.json();
-          saveStatus.innerHTML = '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i> Video opgeslagen!</span>';
-
-          // Reload videos
-          setTimeout(() => {
-            this.loadVideos();
-          }, 1000);
-
-        } catch (error) {
-          console.error('Save error:', error);
-          saveStatus.innerHTML = `<span style="color: #ef4444;"><i class="fas fa-exclamation-circle"></i> ${error.message}</span>`;
-        }
-      },
-
-      resetGenerator() {
-        document.getElementById('progressContainer').classList.remove('active');
-        document.getElementById('resultContainer').classList.remove('active');
-        document.getElementById('generateBtn').disabled = false;
-        document.getElementById('generateBtn').style.opacity = '1';
-        document.getElementById('progressBar').style.width = '0%';
-        document.getElementById('progressText').textContent = 'Voorbereiden...';
-
-        if (this.statusInterval) {
-          clearInterval(this.statusInterval);
-          this.statusInterval = null;
-        }
-
-        this.renderId = null;
-        
-        // Reset destinations and clips for new video
-        this.destinations = [];
-        this.selectedClips = [];
-        this.travelData = null;
-        document.getElementById('importedDestinations').style.display = 'none';
-        document.getElementById('videoTitle').value = 'Mijn Video';
-        document.getElementById('travelIdInput').value = '';
-        document.getElementById('importStatus').innerHTML = '';
-        this.renderDestinations();
-      },
-
-      // Destinations management
-      destinations: [],
-      currentSearchDestination: null,
-
-      renderDestinations() {
-        const grid = document.getElementById('destinationsGrid');
-        if (!grid) return;
-
-        if (this.destinations.length === 0) {
-          grid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
-              <i class="fas fa-map-marker-alt" style="font-size: 48px; margin-bottom: 12px; opacity: 0.3;"></i>
-              <p>Geen bestemmingen. Importeer een reis of voeg handmatig toe.</p>
-            </div>
-          `;
-          return;
-        }
-
-        grid.innerHTML = this.destinations.map((dest, index) => {
-          const clips = this.selectedClips.filter(c => c.destinationIndex === index);
-          const clipCount = clips.length;
-          
-          return `
-            <div class="destination-card" style="background: #0f172a; border: 2px solid ${clipCount > 0 ? '#22c55e' : '#334155'}; border-radius: 12px; padding: 16px; position: relative;">
-              <button onclick="VideoStudio.removeDestination(${index})" style="position: absolute; top: 8px; right: 8px; background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 14px;" title="Verwijderen">
-                <i class="fas fa-times"></i>
-              </button>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #e2e8f0;">${dest.name}</h4>
-              </div>
-              <button onclick="VideoStudio.openClipSearch(${index})" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 13px;">
-                <i class="fas fa-search"></i> Zoek clips
-              </button>
-              <div style="margin-top: 12px;">
-                ${clipCount > 0 ? `
-                  <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;">
-                    ${clips.slice(0, 3).map(clip => `
-                      <img src="${clip.thumbnail}" style="width: 50px; height: 35px; object-fit: cover; border-radius: 4px;">
-                    `).join('')}
-                    ${clipCount > 3 ? `<div style="width: 50px; height: 35px; background: #334155; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #94a3b8;">+${clipCount - 3}</div>` : ''}
-                  </div>
-                ` : ''}
-                <div style="font-size: 12px; color: ${clipCount > 0 ? '#22c55e' : '#64748b'};">
-                  <i class="fas fa-film"></i> ${clipCount} clip${clipCount !== 1 ? 's' : ''} geselecteerd
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        this.updateSelectedCount();
-      },
-
-      addDestination() {
-        const name = prompt('Voer de naam van de bestemming in:');
-        if (!name || !name.trim()) return;
-
-        this.destinations.push({ name: name.trim() });
-        this.renderDestinations();
-      },
-
-      removeDestination(index) {
-        if (!confirm(`Weet je zeker dat je "${this.destinations[index].name}" wilt verwijderen?`)) return;
-        
-        // Remove clips for this destination
-        this.selectedClips = this.selectedClips.filter(c => c.destinationIndex !== index);
-        // Update indices for remaining clips
-        this.selectedClips = this.selectedClips.map(c => {
-          if (c.destinationIndex > index) {
-            return { ...c, destinationIndex: c.destinationIndex - 1 };
-          }
-          return c;
-        });
-        
-        this.destinations.splice(index, 1);
-        this.renderDestinations();
-      },
-
-      async openClipSearch(destinationIndex) {
-        this.currentSearchDestination = destinationIndex;
-        const dest = this.destinations[destinationIndex];
-        
-        // Check if MediaPicker is available
-        if (!window.MediaPicker || !window.MediaPicker.openVideo) {
-          console.error('[VideoStudio] MediaPicker not available');
-          alert('Media Picker niet beschikbaar. Herlaad de pagina.');
-          return;
-        }
-
-        try {
-          // Open MediaPicker in video mode with Pexels tab
-          const result = await window.MediaPicker.openVideo({
-            defaultTab: 'pexels',
-            searchQuery: dest.name
-          });
-
-          if (!result) {
-            console.log('[VideoStudio] User cancelled clip selection');
-            return;
-          }
-
-          // Handle single video selection
-          if (result.source === 'pexels' && result.type === 'video') {
-            this.addClipToDestination(destinationIndex, {
-              id: result.id || Date.now(),
-              url: result.videoUrl || result.url,
-              thumbnail: result.thumbnail,
-              duration: result.duration || 5
-            });
-          }
-          
-          // Handle playlist (multiple videos)
-          if (result.type === 'video-playlist' && result.playlist) {
-            result.playlist.forEach(video => {
-              this.addClipToDestination(destinationIndex, {
-                id: video.id || Date.now() + Math.random(),
-                url: video.videoUrl || video.url,
-                thumbnail: video.thumbnail,
-                duration: video.duration || 5
-              });
-            });
-          }
-
-        } catch (error) {
-          console.error('[VideoStudio] MediaPicker error:', error);
-          alert('Fout bij openen Media Picker: ' + error.message);
-        }
-      },
-
-      addClipToDestination(destinationIndex, clipData) {
-        // Check if clip already exists for this destination
-        const exists = this.selectedClips.some(
-          c => c.id === clipData.id && c.destinationIndex === destinationIndex
-        );
-        
-        if (!exists) {
-          this.selectedClips.push({
-            id: clipData.id,
-            url: clipData.url,
-            thumbnail: clipData.thumbnail,
-            duration: clipData.duration,
-            destinationIndex: destinationIndex,
-            destinationName: this.destinations[destinationIndex].name
-          });
-          
-          console.log('[VideoStudio] Clip added for', this.destinations[destinationIndex].name);
-        }
-
-        this.updateSelectedCount();
-        this.renderDestinations();
-      },
-
-      updateSelectedCount() {
-        const count = this.selectedClips.length;
-        document.getElementById('selectedCount').textContent = `${count} clip${count !== 1 ? 's' : ''} geselecteerd`;
-      },
-
-      // Travel Compositor Import
-      travelData: null,
-
-      async importTravelId() {
-        const input = document.getElementById('travelIdInput');
-        const status = document.getElementById('importStatus');
-        const ideaId = input.value.trim();
-
-        if (!ideaId) {
-          status.innerHTML = '<span style="color: #f59e0b;"><i class="fas fa-exclamation-triangle"></i> Voer een Travel Compositor ID in</span>';
-          return;
-        }
-
-        status.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Laden...</span>';
-
-        try {
-          const response = await fetch(`/api/ideas/${ideaId}`);
-          if (!response.ok) throw new Error('Reis niet gevonden');
-
-          const data = await response.json();
-          this.travelData = data;
-
-          // Update title
-          const title = data.title || data.name || 'Mijn Reis';
-          document.getElementById('videoTitle').value = title;
-
-          // Load destinations into the destinations array
-          const destinations = data.destinations || [];
-          if (destinations.length > 0) {
-            // Clear existing destinations and clips
-            this.destinations = [];
-            this.selectedClips = [];
-            
-            // Add each destination
-            destinations.forEach(dest => {
-              const name = dest.name || dest.title || dest;
-              this.destinations.push({ name: name });
-            });
-
-            // Show imported destinations tags
-            document.getElementById('importedDestinations').style.display = 'block';
-            document.getElementById('destinationTags').innerHTML = this.destinations.map(dest => {
-              return `<span style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500;">${dest.name}</span>`;
-            }).join('');
-
-            status.innerHTML = `<span style="color: #22c55e;"><i class="fas fa-check-circle"></i> "${title}" geladen met ${destinations.length} bestemming${destinations.length !== 1 ? 'en' : ''}</span>`;
-
-            // Render the destinations grid
-            this.renderDestinations();
-          } else {
-            status.innerHTML = `<span style="color: #22c55e;"><i class="fas fa-check-circle"></i> "${title}" geladen (geen bestemmingen gevonden)</span>`;
-          }
-
-        } catch (error) {
-          console.error('Import error:', error);
-          status.innerHTML = `<span style="color: #ef4444;"><i class="fas fa-exclamation-circle"></i> ${error.message}</span>`;
-        }
-      },
-
-      // Search clips for each destination from imported travel
-      async searchDestinationClips() {
-        if (!this.travelData || !this.travelData.destinations) return;
-
-        for (const dest of this.travelData.destinations) {
-          const name = dest.name || dest.title || dest;
-          await this.searchClips(name);
-        }
-      }
-    };
-
-    // Initialize on load
-    document.addEventListener('DOMContentLoaded', () => {
-      VideoStudio.init();
-    });
-
-    // Also try to load config
-    if (typeof window.MEDIA_CONFIG === 'undefined') {
-      // Try to load from config file
-      const script = document.createElement('script');
-      script.src = '/js/config.local.js';
-      script.onerror = () => console.log('No local config found');
-      document.head.appendChild(script);
-    }
-  </script>
+  <footer>
+    <p>&copy; 2026 AI Travel Video. Onderdeel van <a href="https://www.ai-websitestudio.nl" target="_blank">AI Website Studio</a></p>
+  </footer>
 </body>
 </html>

@@ -9,6 +9,10 @@
       "destination": "/api/video/status.js?id=:id"
     },
     {
+      "source": "/generator",
+      "destination": "/generator.html"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     }
