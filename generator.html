@@ -1550,13 +1550,20 @@
           });
         });
 
-        // Setup theme buttons
+        // Setup theme buttons - set search query and add as destination
         document.querySelectorAll('.theme-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             const theme = btn.dataset.theme;
-            this.searchClips(theme);
+            // Set the search input value
+            document.getElementById('customSearch').value = theme;
+            // Add as a destination if not already present
+            const themeName = btn.textContent.trim();
+            if (!this.destinations.some(d => d.name === themeName)) {
+              this.destinations.push({ name: themeName });
+              this.renderDestinations();
+            }
           });
         });
 
