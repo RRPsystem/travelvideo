@@ -224,12 +224,25 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
     }]
   });
 
+  // Helper: Find custom overlay text for destination
+  function getOverlayText(destName) {
+    const dest = destinations.find(d => d.name === destName);
+    return dest?.overlayText || destName;
+  }
+
+  // Helper: Find custom hotel info for destination
+  function getCustomHotelInfo(destName) {
+    const dest = destinations.find(d => d.name === destName);
+    return dest?.hotelInfo || null;
+  }
+
   // Track 3: Destination name overlays (bottom left, brief)
   const destNameClips = clips.map((clip, index) => {
+    const overlayText = getOverlayText(clip.destination);
     return {
       asset: {
         type: 'title',
-        text: clip.destination,
+        text: overlayText,
         style: 'minimal',
         color: '#ffffff',
         size: 'medium',
@@ -252,21 +265,32 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
   tracks.push({ clips: destNameClips });
 
   // Track 4: Hotel info overlays (bottom right, after destination name fades)
-  if (showHotelOverlay && hotels.length > 0) {
+  if (showHotelOverlay) {
     const hotelClips = [];
     
     clips.forEach((clip, index) => {
+      // First check for custom hotel info, then fall back to TC data
+      const customHotelInfo = getCustomHotelInfo(clip.destination);
       const hotel = findHotelForDestination(clip.destination);
-      if (hotel) {
-        // Build hotel text (use title type for compatibility)
+      
+      let hotelText = null;
+      
+      if (customHotelInfo) {
+        // Use custom hotel info from UI
+        hotelText = customHotelInfo;
+      } else if (hotel) {
+        // Build hotel text from TC data
         const hotelName = hotel.name || hotel.title || 'Hotel';
         const stars = hotel.stars ? '★'.repeat(hotel.stars) : '';
         const nights = hotel.nights || '';
         
-        let hotelText = hotelName;
+        hotelText = hotelName;
         if (stars) hotelText += ` ${stars}`;
         if (nights) hotelText += ` • ${nights} nachten`;
-        
+      }
+      
+      // Add hotel overlay if we have text
+      if (hotelText) {
         hotelClips.push({
           asset: {
             type: 'title',

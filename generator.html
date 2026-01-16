@@ -1770,7 +1770,11 @@
         try {
           // Build payload with clips organized by destination
           const payload = {
-            destinations: this.destinations.map(d => ({ name: d.name })),
+            destinations: this.destinations.map(d => ({ 
+              name: d.name,
+              overlayText: d.overlayText || d.name,
+              hotelInfo: d.hotelInfo || ''
+            })),
             clips: this.selectedClips.map(clip => ({
               url: clip.url,
               destination: clip.destinationName || 'Clip',
@@ -1945,6 +1949,8 @@
         grid.innerHTML = this.destinations.map((dest, index) => {
           const clips = this.selectedClips.filter(c => c.destinationIndex === index);
           const clipCount = clips.length;
+          const overlayText = dest.overlayText || dest.name;
+          const hotelInfo = dest.hotelInfo || '';
           
           return `
             <div class="destination-card" style="background: #0f172a; border: 2px solid ${clipCount > 0 ? '#22c55e' : '#334155'}; border-radius: 12px; padding: 16px; position: relative;">
@@ -1954,6 +1960,23 @@
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h4 style="margin: 0; font-size: 16px; font-weight: 600; color: #e2e8f0;">${dest.name}</h4>
               </div>
+              
+              <!-- Overlay Text Input -->
+              <div style="margin-bottom: 12px;">
+                <label style="font-size: 11px; color: #64748b; display: block; margin-bottom: 4px;">Overlay tekst:</label>
+                <input type="text" value="${overlayText}" onchange="VideoStudio.updateOverlayText(${index}, this.value)" 
+                  style="width: 100%; padding: 8px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px;"
+                  placeholder="Tekst in video">
+              </div>
+              
+              <!-- Hotel Info Input (optional) -->
+              <div style="margin-bottom: 12px;">
+                <label style="font-size: 11px; color: #64748b; display: block; margin-bottom: 4px;">Hotel info (optioneel):</label>
+                <input type="text" value="${hotelInfo}" onchange="VideoStudio.updateHotelInfo(${index}, this.value)" 
+                  style="width: 100%; padding: 8px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px;"
+                  placeholder="Bijv: Hotel Marriott ★★★★">
+              </div>
+              
               <button onclick="VideoStudio.openClipSearch(${index})" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 13px;">
                 <i class="fas fa-search"></i> Zoek clips
               </button>
@@ -2000,6 +2023,18 @@
         
         this.destinations.splice(index, 1);
         this.renderDestinations();
+      },
+
+      updateOverlayText(index, text) {
+        if (this.destinations[index]) {
+          this.destinations[index].overlayText = text;
+        }
+      },
+
+      updateHotelInfo(index, text) {
+        if (this.destinations[index]) {
+          this.destinations[index].hotelInfo = text;
+        }
       },
 
       async openClipSearch(destinationIndex) {
