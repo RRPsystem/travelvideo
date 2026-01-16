@@ -1093,6 +1093,106 @@
         <p>Selecteer clips en genereer een professionele video</p>
       </div>
 
+      <!-- Template Selector -->
+      <div class="card slide-up" style="border: 2px solid #8b5cf6;">
+        <div class="card-header">
+          <h3><i class="fas fa-palette"></i> Kies Video Stijl</h3>
+        </div>
+        <p style="color: #94a3b8; margin-bottom: 20px;">
+          Selecteer een template voor je video. Dit bepaalt de intro, overlays en algemene stijl.
+        </p>
+        <div id="templateGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+          
+          <!-- Luxe Template -->
+          <div class="template-card" data-template="luxe" onclick="VideoStudio.selectTemplate('luxe')" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #334155; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 0 10px 0 10px;">LUXE</div>
+            <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">✨</div>
+            <h4 style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 16px; text-align: center;">Luxe & Elegantie</h4>
+            <p style="margin: 0; color: #64748b; font-size: 12px; text-align: center;">Stijlvolle overgangen, gouden accenten</p>
+            <div style="margin-top: 12px; display: flex; gap: 4px; justify-content: center;">
+              <span style="background: #fbbf24; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #1e293b; width: 16px; height: 16px; border-radius: 50%; border: 1px solid #fbbf24;"></span>
+              <span style="background: #ffffff; width: 16px; height: 16px; border-radius: 50%;"></span>
+            </div>
+          </div>
+
+          <!-- Avontuur Template -->
+          <div class="template-card" data-template="adventure" onclick="VideoStudio.selectTemplate('adventure')" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #334155; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 0 10px 0 10px;">ACTIEF</div>
+            <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">🏔️</div>
+            <h4 style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 16px; text-align: center;">Avontuur</h4>
+            <p style="margin: 0; color: #64748b; font-size: 12px; text-align: center;">Dynamisch, energiek, snelle cuts</p>
+            <div style="margin-top: 12px; display: flex; gap: 4px; justify-content: center;">
+              <span style="background: #22c55e; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #0f172a; width: 16px; height: 16px; border-radius: 50%; border: 1px solid #22c55e;"></span>
+              <span style="background: #f97316; width: 16px; height: 16px; border-radius: 50%;"></span>
+            </div>
+          </div>
+
+          <!-- Familie Template -->
+          <div class="template-card" data-template="family" onclick="VideoStudio.selectTemplate('family')" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #334155; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 0 10px 0 10px;">FAMILIE</div>
+            <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">👨‍👩‍👧‍👦</div>
+            <h4 style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 16px; text-align: center;">Familie</h4>
+            <p style="margin: 0; color: #64748b; font-size: 12px; text-align: center;">Warm, vriendelijk, zachte kleuren</p>
+            <div style="margin-top: 12px; display: flex; gap: 4px; justify-content: center;">
+              <span style="background: #ec4899; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #fce7f3; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #8b5cf6; width: 16px; height: 16px; border-radius: 50%;"></span>
+            </div>
+          </div>
+
+          <!-- Romantisch Template -->
+          <div class="template-card" data-template="romantic" onclick="VideoStudio.selectTemplate('romantic')" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #334155; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 0 10px 0 10px;">ROMANTIEK</div>
+            <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">💕</div>
+            <h4 style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 16px; text-align: center;">Romantisch</h4>
+            <p style="margin: 0; color: #64748b; font-size: 12px; text-align: center;">Dromerig, slow-motion, warm</p>
+            <div style="margin-top: 12px; display: flex; gap: 4px; justify-content: center;">
+              <span style="background: #f43f5e; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #fda4af; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #7c3aed; width: 16px; height: 16px; border-radius: 50%;"></span>
+            </div>
+          </div>
+
+          <!-- Zakelijk Template -->
+          <div class="template-card" data-template="business" onclick="VideoStudio.selectTemplate('business')" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #334155; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 0 10px 0 10px;">ZAKELIJK</div>
+            <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">💼</div>
+            <h4 style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 16px; text-align: center;">Zakelijk</h4>
+            <p style="margin: 0; color: #64748b; font-size: 12px; text-align: center;">Professioneel, strak, minimalistisch</p>
+            <div style="margin-top: 12px; display: flex; gap: 4px; justify-content: center;">
+              <span style="background: #3b82f6; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #1e293b; width: 16px; height: 16px; border-radius: 50%; border: 1px solid #3b82f6;"></span>
+              <span style="background: #e2e8f0; width: 16px; height: 16px; border-radius: 50%;"></span>
+            </div>
+          </div>
+
+          <!-- Tropisch Template -->
+          <div class="template-card" data-template="tropical" onclick="VideoStudio.selectTemplate('tropical')" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 2px solid #334155; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 0 10px 0 10px;">TROPISCH</div>
+            <div style="font-size: 48px; text-align: center; margin-bottom: 12px;">🏝️</div>
+            <h4 style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 16px; text-align: center;">Tropisch</h4>
+            <p style="margin: 0; color: #64748b; font-size: 12px; text-align: center;">Zonnig, relaxed, felle kleuren</p>
+            <div style="margin-top: 12px; display: flex; gap: 4px; justify-content: center;">
+              <span style="background: #06b6d4; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #fbbf24; width: 16px; height: 16px; border-radius: 50%;"></span>
+              <span style="background: #22c55e; width: 16px; height: 16px; border-radius: 50%;"></span>
+            </div>
+          </div>
+
+        </div>
+        <div id="selectedTemplateInfo" style="margin-top: 20px; padding: 16px; background: rgba(139, 92, 246, 0.1); border-radius: 8px; display: none;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-check-circle" style="color: #22c55e; font-size: 24px;"></i>
+            <div>
+              <div style="font-weight: 600; color: #e2e8f0;">Template geselecteerd: <span id="selectedTemplateName">-</span></div>
+              <div style="font-size: 13px; color: #94a3b8;">Je kunt dit later nog wijzigen</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Rondreis Planner Import -->
       <div class="card slide-up" style="border: 2px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);">
         <div class="card-header">
@@ -1392,6 +1492,53 @@
       voiceoverUrl: null,
       renderId: null,
       statusInterval: null,
+      selectedTemplate: null,
+      
+      // Template configurations
+      templates: {
+        luxe: {
+          name: 'Luxe & Elegantie',
+          colors: { primary: '#fbbf24', secondary: '#1e293b', accent: '#ffffff' },
+          titleStyle: 'future',
+          transition: 'fade',
+          overlayPosition: 'bottomRight'
+        },
+        adventure: {
+          name: 'Avontuur',
+          colors: { primary: '#22c55e', secondary: '#0f172a', accent: '#f97316' },
+          titleStyle: 'chunk',
+          transition: 'slideLeft',
+          overlayPosition: 'bottomLeft'
+        },
+        family: {
+          name: 'Familie',
+          colors: { primary: '#ec4899', secondary: '#fce7f3', accent: '#8b5cf6' },
+          titleStyle: 'minimal',
+          transition: 'fade',
+          overlayPosition: 'bottom'
+        },
+        romantic: {
+          name: 'Romantisch',
+          colors: { primary: '#f43f5e', secondary: '#fda4af', accent: '#7c3aed' },
+          titleStyle: 'subtitle',
+          transition: 'fade',
+          overlayPosition: 'center'
+        },
+        business: {
+          name: 'Zakelijk',
+          colors: { primary: '#3b82f6', secondary: '#1e293b', accent: '#e2e8f0' },
+          titleStyle: 'minimal',
+          transition: 'fade',
+          overlayPosition: 'topRight'
+        },
+        tropical: {
+          name: 'Tropisch',
+          colors: { primary: '#06b6d4', secondary: '#fbbf24', accent: '#22c55e' },
+          titleStyle: 'chunk',
+          transition: 'slideRight',
+          overlayPosition: 'bottomLeft'
+        }
+      },
 
       init() {
         
@@ -1447,6 +1594,30 @@
         // Load videos and render initial destinations
         this.loadVideos();
         this.renderDestinations();
+      },
+
+      selectTemplate(templateId) {
+        this.selectedTemplate = templateId;
+        const template = this.templates[templateId];
+        
+        // Update UI - remove selection from all cards
+        document.querySelectorAll('.template-card').forEach(card => {
+          card.style.borderColor = '#334155';
+          card.style.transform = 'scale(1)';
+        });
+        
+        // Highlight selected card
+        const selectedCard = document.querySelector(`.template-card[data-template="${templateId}"]`);
+        if (selectedCard) {
+          selectedCard.style.borderColor = '#8b5cf6';
+          selectedCard.style.transform = 'scale(1.02)';
+        }
+        
+        // Show selection info
+        document.getElementById('selectedTemplateInfo').style.display = 'block';
+        document.getElementById('selectedTemplateName').textContent = template.name;
+        
+        console.log('[VideoStudio] Template selected:', templateId, template);
       },
 
       showSection(section) {
@@ -1787,7 +1958,9 @@
             travelData: this.travelData,  // Include full TC data for overlays
             showHotelOverlay: showHotelOverlay,
             showFlightOverlay: showFlightOverlay,
-            overlayDuration: overlayDuration
+            overlayDuration: overlayDuration,
+            template: this.selectedTemplate,
+            templateConfig: this.selectedTemplate ? this.templates[this.selectedTemplate] : null
           };
 
           const response = await fetch('/api/video/generate', {

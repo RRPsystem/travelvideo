@@ -33,7 +33,9 @@ module.exports = async function(req, res) {
       travelData = null,        // Full Travel Compositor data for overlays
       showHotelOverlay = true,  // Show hotel info overlay
       showFlightOverlay = true, // Show flight info overlay
-      overlayDuration = 0.4     // Overlay shows for 40% of clip duration (max 50%)
+      overlayDuration = 0.4,    // Overlay shows for 40% of clip duration (max 50%)
+      template = null,          // Selected template ID
+      templateConfig = null     // Template configuration (colors, styles, etc.)
     } = req.body;
 
     if (!destinations || destinations.length === 0) {
@@ -60,7 +62,10 @@ module.exports = async function(req, res) {
       travelData,
       showHotelOverlay,
       showFlightOverlay,
-      overlayDuration: Math.min(overlayDuration, 0.5) // Max 50%
+      overlayDuration: Math.min(overlayDuration, 0.5), // Max 50%
+      template,
+      templateConfig,
+      destinations
     });
 
     // Step 3: Submit to Shotstack
@@ -140,17 +145,25 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
     travelData = null, 
     showHotelOverlay = true, 
     showFlightOverlay = true,
-    overlayDuration = 0.4 
+    overlayDuration = 0.4,
+    template = null,
+    templateConfig = null,
+    destinations: destList = []
   } = options;
   
   const tracks = [];
   let currentTime = 0;
   const overlayLength = clipDuration * overlayDuration; // Overlay duration (e.g., 40% of clip)
 
+  // Template styling defaults
+  const titleStyle = templateConfig?.titleStyle || 'minimal';
+  const transitionType = templateConfig?.transition || 'fade';
+  const overlayPosition = templateConfig?.overlayPosition || 'bottomLeft';
+
   // Extract hotels and flights from travel data
   const hotels = travelData?.hotels || [];
   const flights = travelData?.flights || [];
-  const destinations = travelData?.destinations || [];
+  const destinations = destList.length > 0 ? destList : (travelData?.destinations || []);
 
   // Helper: Find hotel for a destination
   function findHotelForDestination(destName) {
@@ -195,21 +208,21 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
       fit: 'cover',
       scale: 1,
       transition: {
-        in: 'fade',
-        out: 'fade'
+        in: transitionType,
+        out: transitionType
       }
     };
   });
 
   tracks.push({ clips: videoClips });
 
-  // Track 2: Title overlay (intro)
+  // Track 2: Title overlay (intro) - uses template style
   tracks.push({
     clips: [{
       asset: {
         type: 'title',
         text: title,
-        style: 'future',
+        style: titleStyle,
         color: '#ffffff',
         size: 'large',
         background: 'rgba(0,0,0,0.5)',
