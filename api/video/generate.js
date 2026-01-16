@@ -178,7 +178,7 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
     return null;
   }
 
-  // Track 1: Video clips
+  // Track 1: Video clips (audio muted by default)
   const videoClips = clips.map((clip, index) => {
     const start = currentTime;
     currentTime += clipDuration;
@@ -187,7 +187,8 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
       asset: {
         type: 'video',
         src: clip.url,
-        trim: 0
+        trim: 0,
+        volume: 0  // Mute clip audio
       },
       start: start,
       length: clipDuration,
@@ -257,32 +258,27 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
     clips.forEach((clip, index) => {
       const hotel = findHotelForDestination(clip.destination);
       if (hotel) {
-        // Build hotel text
+        // Build hotel text (use title type for compatibility)
         const hotelName = hotel.name || hotel.title || 'Hotel';
         const stars = hotel.stars ? '★'.repeat(hotel.stars) : '';
-        const checkIn = hotel.checkIn || hotel.startDate || '';
-        const checkOut = hotel.checkOut || hotel.endDate || '';
         const nights = hotel.nights || '';
         
-        let hotelText = `🏨 ${hotelName}`;
+        let hotelText = hotelName;
         if (stars) hotelText += ` ${stars}`;
-        if (nights) hotelText += `\n${nights} nachten`;
-        else if (checkIn && checkOut) hotelText += `\n${checkIn} - ${checkOut}`;
+        if (nights) hotelText += ` • ${nights} nachten`;
         
         hotelClips.push({
           asset: {
-            type: 'html',
-            html: `<div style="font-family: Arial, sans-serif; background: rgba(0,0,0,0.7); padding: 12px 20px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-              <div style="color: #a78bfa; font-size: 12px; margin-bottom: 4px;">ACCOMMODATIE</div>
-              <div style="color: white; font-size: 16px; font-weight: bold;">${hotelName} ${stars}</div>
-              ${nights ? `<div style="color: #94a3b8; font-size: 14px; margin-top: 4px;">${nights} nachten</div>` : ''}
-            </div>`,
-            width: 350,
-            height: 100
+            type: 'title',
+            text: hotelText,
+            style: 'minimal',
+            color: '#ffffff',
+            size: 'small',
+            background: 'rgba(0,0,0,0.7)',
+            position: 'bottomRight'
           },
           start: (index * clipDuration) + overlayLength, // Start after destination name
           length: overlayLength,
-          position: 'bottomRight',
           offset: {
             x: -0.05,
             y: -0.1
@@ -313,29 +309,27 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
         if (flight) {
           const airline = flight.airline || flight.carrier || '';
           const flightNum = flight.flightNumber || flight.number || '';
-          const departure = flight.departureTime || flight.departure || '';
-          const arrival = flight.arrivalTime || flight.arrival || '';
           const from = flight.from || flight.origin || '';
           const to = flight.to || flight.destination || '';
           
-          let flightText = isFirst ? '✈️ HEENVLUCHT' : '✈️ TERUGVLUCHT';
+          // Build flight text (use title type for compatibility)
+          let flightText = isFirst ? 'HEENVLUCHT' : 'TERUGVLUCHT';
           if (airline) flightText += ` • ${airline}`;
           if (flightNum) flightText += ` ${flightNum}`;
+          if (from && to) flightText += ` (${from} → ${to})`;
           
           flightClips.push({
             asset: {
-              type: 'html',
-              html: `<div style="font-family: Arial, sans-serif; background: rgba(0,0,0,0.7); padding: 12px 20px; border-radius: 8px; border-left: 4px solid #ec4899;">
-                <div style="color: #f472b6; font-size: 12px; margin-bottom: 4px;">${isFirst ? 'HEENVLUCHT' : 'TERUGVLUCHT'}</div>
-                <div style="color: white; font-size: 16px; font-weight: bold;">${airline} ${flightNum}</div>
-                ${from && to ? `<div style="color: #94a3b8; font-size: 14px; margin-top: 4px;">${from} → ${to}</div>` : ''}
-              </div>`,
-              width: 350,
-              height: 100
+              type: 'title',
+              text: flightText,
+              style: 'minimal',
+              color: '#ffffff',
+              size: 'small',
+              background: 'rgba(0,0,0,0.7)',
+              position: 'topRight'
             },
             start: index * clipDuration,
             length: overlayLength,
-            position: 'topRight',
             offset: {
               x: -0.05,
               y: 0.1
