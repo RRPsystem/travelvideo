@@ -56,9 +56,13 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Missing TC credentials' });
     }
 
-    const base = TC_API_URL.replace(/\/$/, '');
-    const AUTH_PATH = '/authentication/authenticate';
-    const IDEAS_PATH = '/travelidea';
+    // Remove trailing slash and /resources if present (we add it in paths)
+    let base = TC_API_URL.replace(/\/$/, '');
+    if (base.endsWith('/resources')) {
+      base = base.replace(/\/resources$/, '');
+    }
+    const AUTH_PATH = '/resources/authentication/authenticate';
+    const IDEAS_PATH = '/resources/travelidea';
 
     // Query params
     const { language = 'NL', currency = 'EUR', adults = '2' } = req.query || {};
