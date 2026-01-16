@@ -2,6 +2,15 @@
 // Proxies Travel Compositor idea detail using env credentials (Bearer auth).
 
 export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   console.log('[TC API] Function invoked!');
   console.log('[TC API] req.query:', req.query);
   
@@ -15,6 +24,13 @@ export default async function handler(req, res) {
       TC_USERNAME_2 = '',
       TC_PASSWORD_2 = ''
     } = process.env;
+    
+    console.log('[TC API] Environment check:', {
+      hasApiUrl: !!TC_API_URL,
+      hasMicrositeId: !!TC_MICROSITE_ID,
+      hasUsername: !!TC_USERNAME,
+      hasPassword: !!TC_PASSWORD
+    });
 
     const { id } = req.query || {};
     
