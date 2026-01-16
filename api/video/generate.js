@@ -25,9 +25,10 @@ module.exports = async function(req, res) {
 
     const { 
       destinations = [], 
+      clips = [],
       title = 'Jouw Reis',
       voiceoverUrl = null,
-      duration = 3,
+      clipDuration = 7,
       clipsPerDestination = 2  // Aantal clips per bestemming (1-3)
     } = req.body;
 
@@ -51,7 +52,7 @@ module.exports = async function(req, res) {
     console.log('[VideoGen] Found clips:', validClips.length);
 
     // Step 2: Create timeline
-    const timeline = createTimeline(validClips, title, duration, voiceoverUrl);
+    const timeline = createTimeline(validClips, title, clipDuration, voiceoverUrl);
 
     // Step 3: Submit to Shotstack
     const renderResponse = await submitToShotstack(timeline, SHOTSTACK_API_KEY, SHOTSTACK_ENV);
