@@ -1,18 +1,9 @@
 // Vercel Serverless Function: POST /api/videos/upload
 // Upload generated video to Vercel Blob Storage
 
-import { put } from '@vercel/blob';
+const { put } = require('@vercel/blob');
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb', // Max video size
-    },
-  },
-  maxDuration: 60, // 60 seconds max execution time
-};
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
