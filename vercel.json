@@ -1,60 +1,14 @@
 {
   "version": 2,
   "name": "ai-travel-video",
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "source": "/api/video/status/:id",
+      "destination": "/api/video/status.js?id=:id"
     },
     {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "js/**/*.js",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/video/generate",
-      "dest": "/api/video/generate.js"
-    },
-    {
-      "src": "/api/video/status/(.*)",
-      "dest": "/api/video/status.js?id=$1"
-    },
-    {
-      "src": "/api/video/upload-voiceover",
-      "dest": "/api/video/upload-voiceover.js"
-    },
-    {
-      "src": "/api/pexels/search",
-      "dest": "/api/pexels/search.js"
-    },
-    {
-      "src": "/api/unsplash/search",
-      "dest": "/api/unsplash/search.js"
-    },
-    {
-      "src": "/api/storyblocks/search",
-      "dest": "/api/storyblocks/search.js"
-    },
-    {
-      "src": "/api/videos/upload",
-      "dest": "/api/videos/upload.js"
-    },
-    {
-      "src": "/api/videos/list",
-      "dest": "/api/videos/list.js"
-    },
-    {
-      "src": "/api/videos/delete",
-      "dest": "/api/videos/delete.js"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
+      "source": "/",
+      "destination": "/index.html"
     }
   ],
   "headers": [
