@@ -1826,40 +1826,25 @@
           return;
         }
 
-        const grid = document.getElementById('clipsGrid');
-        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8; grid-column: 1/-1;"><i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i><p style="margin-top: 12px;">Zoeken...</p></div>';
-
-        try {
-          // Use server-side API route (uses Vercel env vars in production)
-          const response = await fetch(`/api/pexels/search?query=${encodeURIComponent(searchQuery)}&per_page=20&orientation=landscape`);
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.error || data.detail || 'Zoeken mislukt');
-          }
-
-          if (data.videos && data.videos.length > 0) {
-            this.renderClips(data.videos);
-          } else {
-            grid.innerHTML = `
-              <div class="empty-state" style="grid-column: 1/-1;">
-                <i class="fas fa-search"></i>
-                <h3>Geen resultaten</h3>
-                <p>Probeer een andere zoekterm</p>
-              </div>
-            `;
-          }
-        } catch (error) {
-          console.error('Search error:', error);
-          grid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1;">
-              <i class="fas fa-exclamation-triangle"></i>
-              <h3>Zoeken mislukt</h3>
-              <p>${error.message}</p>
-            </div>
-          `;
+        // Extract destination name from search query (last word or after theme keywords)
+        let destName = searchQuery;
+        if (this.selectedTheme && searchQuery.startsWith(this.selectedTheme)) {
+          destName = searchQuery.replace(this.selectedTheme, '').trim() || this.selectedThemeName || 'Bestemming';
         }
+        
+        // Add destination if not exists
+        let destIndex = this.destinations.findIndex(d => d.name === destName);
+        if (destIndex === -1) {
+          this.destinations.push({ 
+            name: destName, 
+            searchQuery: searchQuery 
+          });
+          destIndex = this.destinations.length - 1;
+          this.renderDestinations();
+        }
+        
+        // Open MediaPicker with the search query
+        this.openClipSearchWithQuery(destIndex, searchQuery);
       },
 
       renderClips(videos) {
