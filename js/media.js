@@ -36,6 +36,7 @@ class MediaPicker {
           <button class="btn btn-secondary tab-btn active" data-tab="upload"><i class="fas fa-upload"></i> Upload</button>
           <button class="btn btn-secondary tab-btn" data-tab="unsplash"><i class="fab fa-unsplash"></i> Unsplash</button>
           <button class="btn btn-secondary tab-btn" data-tab="pexels"><i class="fas fa-video"></i> Pexels</button>
+          <button class="btn tab-btn" data-tab="pixabay" style="background: #00ab6c; color: #fff; font-weight: 600; border: 2px solid #00ab6c;"><i class="fas fa-leaf"></i> Pixabay</button>
           <button class="btn tab-btn" data-tab="storyblocks" style="background: #eab308; color: #000; font-weight: 600; border: 2px solid #eab308;"><i class="fas fa-film"></i> Storyblocks</button>
           <button class="btn btn-secondary tab-btn" data-tab="my-videos"><i class="fas fa-film"></i> Mijn Video's</button>
         </div>
@@ -76,6 +77,25 @@ class MediaPicker {
               <span class="pexels-selected-count" style="font-size: 14px; color: #22c55e; font-weight: 600;">0 video's geselecteerd</span>
               <button class="btn btn-success pexels-use-selected" disabled style="background: #22c55e;">Gebruik Geselecteerde</button>
               <button class="btn btn-primary btn-lg pexels-more" disabled>Laad meer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" data-tab="pixabay" style="display:none;">
+          <div class="mp-row">
+            <input type="text" class="form-control pixabay-query" placeholder="Zoek gratis video's (bv. Dublin travel, nature drone)" />
+            <button class="btn btn-primary btn-lg pixabay-search"><i class="fas fa-search"></i></button>
+          </div>
+          <div class="mp-help" style="margin-bottom: 12px; padding: 10px; background: #ecfdf5; border-left: 3px solid #00ab6c; border-radius: 4px;">
+            <strong>🌿 Gratis Video's:</strong> Pixabay biedt gratis stock video's met goede geografische tagging. Multi-select voor playlists!
+          </div>
+          <div class="pixabay-grid"></div>
+          <div class="mp-row mp-between mp-more-row">
+            <p class="pixabay-note"></p>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <span class="pixabay-selected-count" style="font-size: 14px; color: #00ab6c; font-weight: 600;">0 video's geselecteerd</span>
+              <button class="btn pixabay-use-selected" disabled style="background: #00ab6c; color: #fff; font-weight: 600;">Gebruik Geselecteerde</button>
+              <button class="btn btn-lg pixabay-more" disabled style="background: #00ab6c; color: #fff; font-weight: 600;">Laad meer</button>
             </div>
           </div>
         </div>
@@ -599,6 +619,194 @@ class MediaPicker {
         if (pexelsTabBtn) pexelsTabBtn.addEventListener('click', () => {
           setTimeout(() => {
             const pqi = pexelsPane ? pexelsPane.querySelector('.pexels-query') : null;
+            if (pqi) pqi.focus();
+          }, 0);
+        });
+      }
+
+      // Pixabay Videos
+      if (true) {
+        const pixabayPane = body.querySelector('.tab-content[data-tab="pixabay"]');
+        const noteEl = pixabayPane ? pixabayPane.querySelector('.pixabay-note') : null;
+        const grid = pixabayPane ? pixabayPane.querySelector('.pixabay-grid') : null;
+        const moreBtnPixabay = pixabayPane ? pixabayPane.querySelector('.pixabay-more') : null;
+        const selectedCountEl = pixabayPane ? pixabayPane.querySelector('.pixabay-selected-count') : null;
+        const useSelectedBtn = pixabayPane ? pixabayPane.querySelector('.pixabay-use-selected') : null;
+
+        if (noteEl) noteEl.textContent = '';
+
+        let currentPage = 1;
+        let currentQuery = '';
+
+        const runPixabaySearch = async (append = false) => {
+          const qInput = pixabayPane ? pixabayPane.querySelector('.pixabay-query') : null;
+          const q = (qInput && qInput.value ? qInput.value.trim() : '') || 'travel';
+          if (!append) {
+            if (grid) grid.innerHTML = '<div style="color:#666;">Zoeken...</div>';
+            currentPage = 1;
+            currentQuery = q;
+            if (window._pixabaySelectedVideos) window._pixabaySelectedVideos = [];
+          }
+          
+          try {
+            const url = `/api/pixabay/search?query=${encodeURIComponent(q)}&page=${currentPage}&per_page=20`;
+            const resp = await fetch(url);
+            const data = await resp.json();
+            
+            if (!resp.ok) {
+              throw new Error(data.error || 'API error');
+            }
+            
+            if (!append && grid) grid.innerHTML = '';
+            
+            if (grid) {
+              grid.style.display = 'grid';
+              grid.style.gridTemplateColumns = '1fr 1fr';
+              grid.style.gap = '10px';
+            }
+            
+            const videos = data.videos || [];
+            videos.forEach(video => {
+              const previewUrl = video.preview_url;
+              const downloadUrl = video.download_url;
+              const thumbnail = video.thumbnail;
+              
+              if (!downloadUrl) return;
+              
+              const tile = document.createElement('div');
+              tile.style.cssText = 'border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; background:#f8f9fa; cursor:pointer; position:relative; transition: transform 0.2s, box-shadow 0.2s;';
+              
+              const thumbnailImg = document.createElement('img');
+              thumbnailImg.src = thumbnail || `https://i.vimeocdn.com/video/default_295x166.jpg`;
+              thumbnailImg.alt = video.title || '';
+              thumbnailImg.style.cssText = 'width:100%;height:140px;object-fit:cover;display:block;';
+              
+              const badge = document.createElement('div');
+              badge.style.cssText = 'position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.7); color:white; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; z-index:2;';
+              badge.innerHTML = `<i class="fas fa-play"></i> ${Math.floor(video.duration || 0)}s`;
+              
+              const freeBadge = document.createElement('div');
+              freeBadge.style.cssText = 'position:absolute; top:8px; left:8px; background:#00ab6c; color:#fff; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:700; z-index:2;';
+              freeBadge.textContent = 'GRATIS';
+              
+              let isSelected = false;
+              const selectedCheckmark = document.createElement('div');
+              selectedCheckmark.style.cssText = 'position:absolute; top:8px; left:8px; width:28px; height:28px; background:#00ab6c; border-radius:50%; display:none; align-items:center; justify-content:center; z-index:4; box-shadow:0 2px 8px rgba(0,171,108,0.4);';
+              selectedCheckmark.innerHTML = '<i class="fas fa-check" style="color:#fff; font-size:14px;"></i>';
+              
+              tile.appendChild(thumbnailImg);
+              tile.appendChild(badge);
+              tile.appendChild(freeBadge);
+              tile.appendChild(selectedCheckmark);
+              
+              tile.addEventListener('mouseenter', () => {
+                if (!isSelected) {
+                  tile.style.transform = 'scale(1.02)';
+                  tile.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                }
+              });
+              
+              tile.addEventListener('mouseleave', () => {
+                if (!isSelected) {
+                  tile.style.transform = 'scale(1)';
+                  tile.style.boxShadow = 'none';
+                }
+              });
+              
+              tile.onclick = () => {
+                if (single) {
+                  resolve({
+                    source: 'pixabay',
+                    type: 'video',
+                    url: downloadUrl,
+                    videoUrl: downloadUrl,
+                    thumbnail: thumbnail,
+                    duration: video.duration,
+                    width: video.width,
+                    height: video.height,
+                    id: video.id,
+                    title: video.title
+                  });
+                  close();
+                  return;
+                }
+                
+                isSelected = !isSelected;
+                
+                if (isSelected) {
+                  tile.style.border = '3px solid #00ab6c';
+                  tile.style.transform = 'scale(0.98)';
+                  tile.style.boxShadow = '0 0 0 3px rgba(0,171,108,0.2)';
+                  selectedCheckmark.style.display = 'flex';
+                  freeBadge.style.display = 'none';
+                  
+                  if (!window._pixabaySelectedVideos) window._pixabaySelectedVideos = [];
+                  window._pixabaySelectedVideos.push({
+                    source: 'pixabay',
+                    type: 'video',
+                    url: downloadUrl,
+                    videoUrl: downloadUrl,
+                    thumbnail: thumbnail,
+                    duration: video.duration,
+                    width: video.width,
+                    height: video.height,
+                    id: video.id,
+                    title: video.title
+                  });
+                } else {
+                  tile.style.border = '1px solid #e5e7eb';
+                  tile.style.transform = 'scale(1)';
+                  tile.style.boxShadow = 'none';
+                  selectedCheckmark.style.display = 'none';
+                  freeBadge.style.display = 'block';
+                  
+                  if (window._pixabaySelectedVideos) {
+                    window._pixabaySelectedVideos = window._pixabaySelectedVideos.filter(v => v.id !== video.id);
+                  }
+                }
+                
+                const count = window._pixabaySelectedVideos ? window._pixabaySelectedVideos.length : 0;
+                if (selectedCountEl) selectedCountEl.textContent = `${count} video's geselecteerd`;
+                if (useSelectedBtn) useSelectedBtn.disabled = count === 0;
+              };
+              
+              if (grid) grid.appendChild(tile);
+            });
+            
+            const totalResults = data.total_results || 0;
+            const hasMore = videos.length >= 20;
+            if (moreBtnPixabay) moreBtnPixabay.disabled = !hasMore;
+            if (noteEl) noteEl.textContent = `${totalResults} gratis video's gevonden`;
+            
+          } catch (err) {
+            console.error('Pixabay error:', err);
+            if (grid) grid.innerHTML = '<div style="color:#c00;">Pixabay fout: ' + err.message + '</div>';
+            if (moreBtnPixabay) moreBtnPixabay.disabled = true;
+          }
+        };
+
+        const pixabaySearchBtn = pixabayPane ? pixabayPane.querySelector('.pixabay-search') : null;
+        if (pixabaySearchBtn) pixabaySearchBtn.addEventListener('click', () => runPixabaySearch(false));
+        if (moreBtnPixabay) moreBtnPixabay.addEventListener('click', () => { currentPage += 1; runPixabaySearch(true); });
+        
+        if (useSelectedBtn) {
+          useSelectedBtn.addEventListener('click', () => {
+            if (window._pixabaySelectedVideos && window._pixabaySelectedVideos.length > 0) {
+              resolve({
+                source: 'pixabay',
+                type: 'video-playlist',
+                playlist: window._pixabaySelectedVideos,
+                count: window._pixabaySelectedVideos.length
+              });
+              close();
+            }
+          });
+        }
+        
+        const pixabayTabBtn = tabs.find(b => b.getAttribute('data-tab')==='pixabay');
+        if (pixabayTabBtn) pixabayTabBtn.addEventListener('click', () => {
+          setTimeout(() => {
+            const pqi = pixabayPane ? pixabayPane.querySelector('.pixabay-query') : null;
             if (pqi) pqi.focus();
           }, 0);
         });
