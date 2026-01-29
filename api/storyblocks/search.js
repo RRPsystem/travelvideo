@@ -75,8 +75,23 @@ export default async function handler(req, res) {
     const europeanCities = ['belfast', 'dublin', 'london', 'paris', 'amsterdam', 'rome', 'barcelona', 'lisbon', 'prague', 'vienna', 'berlin', 'munich', 'brussels', 'copenhagen', 'stockholm', 'oslo', 'helsinki', 'edinburgh', 'glasgow', 'cork', 'galway', 'reykjavik'];
     const isEuropeanSearch = europeanCities.some(city => originalQuery.includes(city));
     
-    // Keywords that indicate Asian/irrelevant content for European searches
-    const asianKeywords = ['thailand', 'thai', 'vietnam', 'vietnamese', 'cambodia', 'indonesia', 'bali', 'philippines', 'malaysia', 'singapore', 'china', 'chinese', 'japan', 'japanese', 'korea', 'korean', 'india', 'indian', 'asia', 'asian', 'tropical island', 'limestone', 'karst', 'halong', 'phuket', 'krabi', 'phang nga', 'james bond island'];
+    // Keywords that indicate irrelevant content for European/Irish city searches
+    const irrelevantKeywords = [
+      // Asia
+      'thailand', 'thai', 'vietnam', 'vietnamese', 'cambodia', 'indonesia', 'bali', 'philippines', 'malaysia', 'singapore', 'china', 'chinese', 'japan', 'japanese', 'korea', 'korean', 'india', 'indian', 'asia', 'asian', 'tropical island', 'limestone', 'karst', 'halong', 'phuket', 'krabi', 'phang nga', 'james bond island', 'maldives', 'sri lanka',
+      // Turkey
+      'turkey', 'turkish', 'cappadocia', 'pamukkale', 'istanbul', 'ankara', 'antalya', 'bodrum', 'ephesus', 'goreme', 'hot air balloon turkey',
+      // Middle East
+      'dubai', 'uae', 'emirates', 'qatar', 'saudi', 'oman', 'bahrain', 'kuwait', 'jordan', 'petra',
+      // Africa
+      'morocco', 'marrakech', 'egypt', 'cairo', 'pyramid', 'sahara', 'safari', 'serengeti', 'kenya', 'tanzania', 'south africa', 'cape town',
+      // Americas (for European searches)
+      'mexico', 'cancun', 'caribbean', 'cuba', 'jamaica', 'bahamas', 'brazil', 'rio', 'peru', 'machu picchu', 'argentina', 'chile', 'colombia',
+      // Australia/Pacific
+      'australia', 'sydney', 'melbourne', 'new zealand', 'fiji', 'tahiti', 'bora bora',
+      // Generic irrelevant
+      'hot air balloon', 'balloon ride', 'desert', 'jungle', 'rainforest', 'savanna', 'coral reef', 'palm tree beach'
+    ];
     
     let filteredResults = data.results || [];
     
@@ -89,9 +104,9 @@ export default async function handler(req, res) {
         const keywords = (video.keywords || []).map(k => k.toLowerCase()).join(' ');
         const allText = `${title} ${description} ${keywords}`;
         
-        // Filter out if contains Asian keywords
-        const isAsian = asianKeywords.some(keyword => allText.includes(keyword));
-        return !isAsian;
+        // Filter out if contains irrelevant keywords
+        const isIrrelevant = irrelevantKeywords.some(keyword => allText.includes(keyword));
+        return !isIrrelevant;
       });
       
       console.log(`[Storyblocks API] Filtered ${beforeCount - filteredResults.length} irrelevant results for European search`);
