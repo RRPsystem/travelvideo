@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { videoData, title, type, duration, width, height, thumbnail } = req.body;
+    const { videoData, title, type, duration, width, height, thumbnail, userId } = req.body;
 
     if (!videoData) {
       return res.status(400).json({ error: 'Geen video data' });
@@ -37,9 +37,12 @@ module.exports = async function handler(req, res) {
     const base64Data = videoData.replace(/^data:video\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // Generate unique filename
+    // Generate unique filename with user isolation
     const timestamp = Date.now();
-    const filename = `videos/${timestamp}-${title?.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'video'}.mp4`;
+    const safeTitle = title?.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'video';
+    // If userId provided, store in user-specific folder for isolation
+    const basePath = userId ? `videos/${userId}` : 'videos';
+    const filename = `${basePath}/${timestamp}-${safeTitle}.mp4`;
 
     console.log('[VideoUpload] Uploading to Blob Storage:', {
       filename,
@@ -83,6 +86,7 @@ module.exports = async function handler(req, res) {
       height: height || 1080,
       size: buffer.length,
       createdAt: new Date().toISOString(),
+      userId: userId || null, // Track which user owns this video
     };
 
     console.log('[VideoUpload] Upload successful:', videoMetadata.id);

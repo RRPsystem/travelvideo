@@ -18,6 +18,8 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // Get userId from query params for user isolation
+    const userId = req.query.userId || req.query.user_id;
     // Check if BLOB_READ_WRITE_TOKEN is configured
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       console.error('[VideoList] BLOB_READ_WRITE_TOKEN not configured');
@@ -27,13 +29,14 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // List all videos from Blob Storage
+    // List videos from Blob Storage - filtered by user if userId provided
+    const prefix = userId ? `videos/${userId}/` : 'videos/';
     const { blobs } = await list({
-      prefix: 'videos/',
+      prefix: prefix,
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
-    console.log('[VideoList] Found', blobs.length, 'videos');
+    console.log('[VideoList] Found', blobs.length, 'videos for prefix:', prefix);
 
     // Transform blob data to video metadata
     const videos = blobs.map(blob => {

@@ -1542,7 +1542,12 @@
         }
       },
 
+      // Current user context (from BOLT deeplink)
+      currentUserId: null,
+
       init() {
+        // Parse URL parameters for deeplink support
+        this.parseDeeplinkParams();
         
         // Setup navigation
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -1604,6 +1609,126 @@
         // Load videos and render initial destinations
         this.loadVideos();
         this.renderDestinations();
+
+        // Auto-import if travelId was provided via deeplink
+        if (this.pendingTravelId) {
+          document.getElementById('travelIdInput').value = this.pendingTravelId;
+          this.importTravelId();
+          this.pendingTravelId = null;
+        }
+      },
+
+      // BOLT integration config
+      boltConfig: {
+        apiUrl: null,
+        brandId: null,
+        token: null,
+        apiKey: null,
+        mode: 'new',
+        tripId: null,
+        agentId: null
+      },
+
+      // Parse deeplink URL parameters from BOLT
+      parseDeeplinkParams() {
+        const params = new URLSearchParams(window.location.search);
+        const hash = window.location.hash; // e.g. #/mode/video/new
+        
+        // === BOLT Integration Parameters ===
+        // API endpoint for BOLT backend
+        const apiUrl = params.get('api');
+        if (apiUrl) {
+          this.boltConfig.apiUrl = apiUrl;
+          console.log('[VideoStudio] BOLT API URL:', apiUrl);
+        }
+
+        // Brand ID (used for user isolation in BOLT)
+        const brandId = params.get('brand_id');
+        if (brandId) {
+          this.boltConfig.brandId = brandId;
+          this.currentUserId = brandId; // Use brand_id for video isolation
+          console.log('[VideoStudio] BOLT Brand ID:', brandId);
+        }
+
+        // JWT Token for authentication
+        const token = params.get('token');
+        if (token) {
+          this.boltConfig.token = token;
+          console.log('[VideoStudio] BOLT JWT token received');
+        }
+
+        // API Key
+        const apiKey = params.get('apikey');
+        if (apiKey) {
+          this.boltConfig.apiKey = apiKey;
+          console.log('[VideoStudio] BOLT API key received');
+        }
+
+        // Parse hash for mode: #/mode/video/new, #/mode/video/edit, #/mode/video/trip
+        if (hash) {
+          const modeMatch = hash.match(/#\/mode\/video\/(\w+)/);
+          if (modeMatch) {
+            this.boltConfig.mode = modeMatch[1]; // 'new', 'edit', or 'trip'
+            console.log('[VideoStudio] BOLT mode:', this.boltConfig.mode);
+          }
+        }
+
+        // Trip ID (for trip mode)
+        const tripId = params.get('trip_id') || params.get('tripId');
+        if (tripId) {
+          this.boltConfig.tripId = tripId;
+          this.pendingTravelId = tripId; // Auto-import trip
+          console.log('[VideoStudio] BOLT Trip ID:', tripId);
+        }
+
+        // Agent ID
+        const agentId = params.get('agent_id') || params.get('agentId');
+        if (agentId) {
+          this.boltConfig.agentId = agentId;
+          console.log('[VideoStudio] BOLT Agent ID:', agentId);
+        }
+
+        // === Legacy/Simple Parameters (backwards compatibility) ===
+        // User ID for video isolation (fallback if no brand_id)
+        if (!this.currentUserId) {
+          const userId = params.get('userId') || params.get('user_id');
+          if (userId) {
+            this.currentUserId = userId;
+            console.log('[VideoStudio] User context set:', userId);
+          }
+        }
+
+        // Travel ID for auto-import (fallback if no trip_id)
+        if (!this.pendingTravelId) {
+          const travelId = params.get('travelId') || params.get('travel_id') || params.get('ideaId');
+          if (travelId) {
+            this.pendingTravelId = travelId;
+            console.log('[VideoStudio] Will auto-import travel:', travelId);
+          }
+        }
+
+        // Template pre-selection
+        const template = params.get('template');
+        if (template && this.templates[template]) {
+          setTimeout(() => this.selectTemplate(template), 100);
+          console.log('[VideoStudio] Template pre-selected:', template);
+        }
+
+        // Auto-navigate to generator section
+        const section = params.get('section') || (this.pendingTravelId ? 'generator' : null);
+        if (section) {
+          setTimeout(() => this.showSection(section), 50);
+        }
+
+        // If BOLT mode is set, always go to generator
+        if (this.boltConfig.mode) {
+          setTimeout(() => this.showSection('generator'), 50);
+        }
+
+        // Log full config for debugging
+        if (this.boltConfig.apiUrl || this.boltConfig.brandId) {
+          console.log('[VideoStudio] BOLT Config:', this.boltConfig);
+        }
       },
 
       selectTemplate(templateId) {
@@ -1658,7 +1783,11 @@
         grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i><p style="margin-top: 12px;">Laden...</p></div>';
 
         try {
-          const response = await fetch('/api/videos/list');
+          // Include userId for user-isolated video list
+          const url = this.currentUserId 
+            ? `/api/videos/list?userId=${encodeURIComponent(this.currentUserId)}`
+            : '/api/videos/list';
+          const response = await fetch(url);
           const data = await response.json();
 
           if (data.success && data.videos && data.videos.length > 0) {
@@ -2037,7 +2166,7 @@
             reader.readAsDataURL(videoBlob);
           });
 
-          // Upload to storage
+          // Upload to storage (include userId for user isolation)
           const response = await fetch('/api/videos/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2047,7 +2176,8 @@
               type: 'ai-generated',
               duration: videoElement.duration || 0,
               width: videoElement.videoWidth || 1920,
-              height: videoElement.videoHeight || 1080
+              height: videoElement.videoHeight || 1080,
+              userId: this.currentUserId
             })
           });
 

@@ -33,10 +33,65 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('[PexelsSearch] Searching for:', query);
+    // Enhance city searches with country context for better geographic results
+    let searchQuery = query.trim();
+    
+    // Map of cities to their countries for better search context
+    const cityCountryMap = {
+      'belfast': 'Belfast Northern Ireland',
+      'dublin': 'Dublin Ireland',
+      'amsterdam': 'Amsterdam Netherlands Holland',
+      'paris': 'Paris France',
+      'london': 'London England United Kingdom',
+      'rome': 'Rome Italy',
+      'barcelona': 'Barcelona Spain',
+      'lisbon': 'Lisbon Portugal',
+      'prague': 'Prague Czech Republic',
+      'vienna': 'Vienna Austria',
+      'berlin': 'Berlin Germany',
+      'munich': 'Munich Germany Bavaria',
+      'brussels': 'Brussels Belgium',
+      'copenhagen': 'Copenhagen Denmark',
+      'stockholm': 'Stockholm Sweden',
+      'oslo': 'Oslo Norway',
+      'helsinki': 'Helsinki Finland',
+      'reykjavik': 'Reykjavik Iceland',
+      'edinburgh': 'Edinburgh Scotland',
+      'glasgow': 'Glasgow Scotland',
+      'cork': 'Cork Ireland',
+      'galway': 'Galway Ireland',
+      'new york': 'New York City USA Manhattan',
+      'los angeles': 'Los Angeles California USA',
+      'tokyo': 'Tokyo Japan',
+      'sydney': 'Sydney Australia',
+      'bangkok': 'Bangkok Thailand',
+      'singapore': 'Singapore city',
+      'hong kong': 'Hong Kong China',
+      'dubai': 'Dubai UAE Emirates'
+    };
+    
+    // Check if query contains a known city and enhance it
+    const queryLower = searchQuery.toLowerCase();
+    for (const [city, enhanced] of Object.entries(cityCountryMap)) {
+      if (queryLower.includes(city)) {
+        // Check if country is already in query
+        const enhancedWords = enhanced.toLowerCase().split(' ');
+        const alreadyHasCountry = enhancedWords.some(word => 
+          word.length > 3 && queryLower.includes(word) && word !== city
+        );
+        
+        if (!alreadyHasCountry) {
+          // Replace city name with enhanced version
+          searchQuery = searchQuery.replace(new RegExp(city, 'i'), enhanced);
+          break;
+        }
+      }
+    }
+    
+    console.log('[PexelsSearch] Enhanced query:', searchQuery);
 
     // Call Pexels API
-    const pexelsUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=${per_page}&page=${page}&orientation=${orientation}`;
+    const pexelsUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchQuery)}&per_page=${per_page}&page=${page}&orientation=${orientation}`;
     
     const response = await fetch(pexelsUrl, {
       headers: {
