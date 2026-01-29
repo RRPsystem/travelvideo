@@ -1,7 +1,5 @@
 // Storyblocks Video Search API Route
-// Proxies requests to Storyblocks API using server-side HMAC authentication
-
-import crypto from 'crypto';
+// Proxies requests to Storyblocks API using server-side API key
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -23,85 +21,23 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Query parameter required' });
   }
 
-  const publicKey = process.env.STORYBLOCKS_PUBLIC_KEY;
-  const privateKey = process.env.STORYBLOCKS_PRIVATE_KEY;
+  const apiKey = process.env.STORYBLOCKS_PUBLIC_KEY;
 
-  if (!publicKey || !privateKey) {
-    console.error('[Storyblocks API] API keys not found in environment variables');
-    return res.status(500).json({ error: 'API keys not configured' });
+  if (!apiKey) {
+    console.error('[Storyblocks API] STORYBLOCKS_PUBLIC_KEY not found in environment variables');
+    return res.status(500).json({ error: 'API key not configured' });
   }
 
   try {
-    // Generate HMAC authentication
-    const expires = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
-    const resource = '/api/v2/videos/search';
-    const hmacBuilder = crypto.createHmac('sha256', privateKey + expires);
-    hmacBuilder.update(resource);
-    const hmac = hmacBuilder.digest('hex');
-
-    // Build URL with proper authentication and search parameters
-    // Enhance city searches with country context for better results
-    let searchQuery = query.trim();
+    // Storyblocks API endpoint (original working version)
+    const url = `https://api.graphicstock.com/api/v2/videos/search?keywords=${encodeURIComponent(query)}&page=${page}&results_per_page=20`;
     
-    // Map of cities to their countries for better search context
-    const cityCountryMap = {
-      'belfast': 'Belfast Northern Ireland UK',
-      'dublin': 'Dublin Ireland',
-      'amsterdam': 'Amsterdam Netherlands',
-      'paris': 'Paris France',
-      'london': 'London England UK',
-      'rome': 'Rome Italy',
-      'barcelona': 'Barcelona Spain',
-      'lisbon': 'Lisbon Portugal',
-      'prague': 'Prague Czech Republic',
-      'vienna': 'Vienna Austria',
-      'berlin': 'Berlin Germany',
-      'munich': 'Munich Germany',
-      'brussels': 'Brussels Belgium',
-      'copenhagen': 'Copenhagen Denmark',
-      'stockholm': 'Stockholm Sweden',
-      'oslo': 'Oslo Norway',
-      'helsinki': 'Helsinki Finland',
-      'reykjavik': 'Reykjavik Iceland',
-      'edinburgh': 'Edinburgh Scotland UK',
-      'glasgow': 'Glasgow Scotland UK',
-      'cork': 'Cork Ireland',
-      'galway': 'Galway Ireland'
-    };
-    
-    // Check if query contains a known city and enhance it
-    const queryLower = searchQuery.toLowerCase();
-    for (const [city, enhanced] of Object.entries(cityCountryMap)) {
-      if (queryLower.includes(city) && !queryLower.includes('ireland') && !queryLower.includes('uk') && !queryLower.includes('netherlands')) {
-        // Replace city name with enhanced version, keeping other words
-        searchQuery = searchQuery.replace(new RegExp(city, 'i'), enhanced);
-        break;
-      }
-    }
-    
-    console.log('[Storyblocks API] Enhanced query:', searchQuery);
-    
-    const params = new URLSearchParams({
-      APIKEY: publicKey,
-      EXPIRES: expires.toString(),
-      HMAC: hmac,
-      keywords: searchQuery,
-      page: page.toString(),
-      results_per_page: '20',
-      user_id: 'travelvideo-user',
-      project_id: 'travelvideo-project',
-      sort_by: 'most_relevant',  // Sort by relevance
-      content_type: 'footage',   // Only footage, not templates
-      quality: 'all'
-    });
-
-    const url = `https://api.storyblocks.com${resource}?${params.toString()}`;
-    
-    console.log('[Storyblocks API] Searching:', searchQuery, 'page:', page);
+    console.log('[Storyblocks API] Searching:', query, 'page:', page);
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
@@ -126,15 +62,50 @@ export default async function handler(req, res) {
         error: 'Storyblocks API error',
         status: response.status,
         details: errorDetails,
-        url: url.replace(publicKey, 'HIDDEN')
+        url: url.replace(apiKey, 'HIDDEN')
       });
     }
 
     const data = await response.json();
     console.log('[Storyblocks API] Success:', data.info?.total_results || 0, 'results');
-    console.log('[Storyblocks API] Response structure:', Object.keys(data));
-
-    return res.status(200).json(data);
+    
+    // Filter out irrelevant results based on search context
+    // If searching for European/Western cities, filter out Asian content
+    const originalQuery = query.toLowerCase();
+    const europeanCities = ['belfast', 'dublin', 'london', 'paris', 'amsterdam', 'rome', 'barcelona', 'lisbon', 'prague', 'vienna', 'berlin', 'munich', 'brussels', 'copenhagen', 'stockholm', 'oslo', 'helsinki', 'edinburgh', 'glasgow', 'cork', 'galway', 'reykjavik'];
+    const isEuropeanSearch = europeanCities.some(city => originalQuery.includes(city));
+    
+    // Keywords that indicate Asian/irrelevant content for European searches
+    const asianKeywords = ['thailand', 'thai', 'vietnam', 'vietnamese', 'cambodia', 'indonesia', 'bali', 'philippines', 'malaysia', 'singapore', 'china', 'chinese', 'japan', 'japanese', 'korea', 'korean', 'india', 'indian', 'asia', 'asian', 'tropical island', 'limestone', 'karst', 'halong', 'phuket', 'krabi', 'phang nga', 'james bond island'];
+    
+    let filteredResults = data.results || [];
+    
+    if (isEuropeanSearch && filteredResults.length > 0) {
+      const beforeCount = filteredResults.length;
+      filteredResults = filteredResults.filter(video => {
+        // Check title, description, and keywords for Asian content
+        const title = (video.title || '').toLowerCase();
+        const description = (video.description || '').toLowerCase();
+        const keywords = (video.keywords || []).map(k => k.toLowerCase()).join(' ');
+        const allText = `${title} ${description} ${keywords}`;
+        
+        // Filter out if contains Asian keywords
+        const isAsian = asianKeywords.some(keyword => allText.includes(keyword));
+        return !isAsian;
+      });
+      
+      console.log(`[Storyblocks API] Filtered ${beforeCount - filteredResults.length} irrelevant results for European search`);
+    }
+    
+    // Return filtered data
+    return res.status(200).json({
+      ...data,
+      results: filteredResults,
+      info: {
+        ...data.info,
+        filtered_count: (data.results?.length || 0) - filteredResults.length
+      }
+    });
 
   } catch (error) {
     console.error('[Storyblocks API] Exception:', error);
