@@ -2158,27 +2158,19 @@
           // Fetch video as blob
           const videoBlob = await fetch(videoElement.src).then(r => r.blob());
           
-          // Convert to base64
-          const base64Video = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(videoBlob);
-          });
+          // Generate filename
+          const timestamp = Date.now();
+          const safeTitle = videoName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+          const basePath = this.currentUserId ? `videos/${this.currentUserId}` : 'videos';
+          const filename = `${basePath}/${timestamp}-${safeTitle}.mp4`;
 
-          // Upload to storage (include userId for user isolation)
-          const response = await fetch('/api/videos/upload', {
+          // Direct upload to Vercel Blob using fetch with FormData
+          const formData = new FormData();
+          formData.append('file', videoBlob, filename);
+
+          const response = await fetch('/api/videos/upload-direct', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              videoData: base64Video,
-              title: videoName,
-              type: 'ai-generated',
-              duration: videoElement.duration || 0,
-              width: videoElement.videoWidth || 1920,
-              height: videoElement.videoHeight || 1080,
-              userId: this.currentUserId
-            })
+            body: formData
           });
 
           if (!response.ok) {
