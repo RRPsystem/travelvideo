@@ -1483,7 +1483,12 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // Supabase client - initialized from URL params or defaults
+    const SUPABASE_URL = new URLSearchParams(window.location.search).get('supabase_url') || 'https://huaaogdxxdcakxryecnw.supabase.co';
+    const SUPABASE_ANON_KEY = new URLSearchParams(window.location.search).get('supabase_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1YWFvZ2R4eGRjYWt4cnllY253Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMzMTI0NzAsImV4cCI6MjA0ODg4ODQ3MH0.Jqe9NHtlxLCllmVk2j5Mkcw4qvMpkGyeY0vN9qTdR_4';
+    
     // Video Studio App
     const VideoStudio = {
       videos: [],
@@ -1495,6 +1500,7 @@
       selectedTemplate: null,
       selectedTheme: null,
       selectedThemeName: null,
+      supabase: null, // Will be initialized in init()
       
       // Template configurations
       templates: {
@@ -1546,6 +1552,10 @@
       currentUserId: null,
 
       init() {
+        // Initialize Supabase client
+        this.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('[VideoStudio] Supabase initialized');
+
         // Parse URL parameters for deeplink support
         this.parseDeeplinkParams();
         
@@ -2152,28 +2162,51 @@
           return;
         }
 
-        saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Opslaan...</span>';
+        saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Video downloaden...</span>';
 
         try {
-          // Save video metadata with Shotstack URL directly (no re-upload needed)
-          const response = await fetch('/api/videos/save-metadata', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+          // Download video from Shotstack
+          const videoBlob = await fetch(videoElement.src).then(r => r.blob());
+          
+          saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Uploaden naar Supabase...</span>';
+
+          // Generate filename
+          const timestamp = Date.now();
+          const safeTitle = videoName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+          const filename = `${timestamp}-${safeTitle}.mp4`;
+          const filePath = this.currentUserId ? `${this.currentUserId}/${filename}` : `public/${filename}`;
+
+          // Upload directly to Supabase Storage (client-side)
+          const { data, error } = await this.supabase.storage
+            .from('videos')
+            .upload(filePath, videoBlob, {
+              contentType: 'video/mp4',
+              upsert: false
+            });
+
+          if (error) throw new Error(error.message);
+
+          // Get public URL
+          const { data: urlData } = this.supabase.storage
+            .from('videos')
+            .getPublicUrl(filePath);
+
+          const publicUrl = urlData.publicUrl;
+
+          // Save metadata to database
+          const { error: dbError } = await this.supabase
+            .from('brand_videos')
+            .insert({
               title: videoName,
-              videoUrl: videoElement.src, // Shotstack URL directly
+              video_url: publicUrl,
               type: 'ai-generated',
-              duration: videoElement.duration || 0,
-              userId: this.currentUserId
-            })
-          });
+              duration_seconds: Math.round(videoElement.duration || 0),
+              status: 'published',
+              user_id: this.currentUserId
+            });
 
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Opslaan mislukt');
-          }
+          if (dbError) console.warn('Metadata save warning:', dbError);
 
-          const result = await response.json();
           saveStatus.innerHTML = '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i> Video opgeslagen!</span>';
 
           // Reload videos
