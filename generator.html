@@ -2165,8 +2165,27 @@
         saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Video downloaden...</span>';
 
         try {
-          // Download video from Shotstack
-          const videoBlob = await fetch(videoElement.src).then(r => r.blob());
+          // Download video from Shotstack using XMLHttpRequest (avoids some CORS issues)
+          const videoBlob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', videoElement.src, true);
+            xhr.responseType = 'blob';
+            xhr.onload = () => {
+              if (xhr.status === 200) {
+                resolve(xhr.response);
+              } else {
+                reject(new Error(`Download failed: ${xhr.status}`));
+              }
+            };
+            xhr.onerror = () => reject(new Error('Download failed'));
+            xhr.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                saveStatus.innerHTML = `<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Downloaden... ${pct}%</span>`;
+              }
+            };
+            xhr.send();
+          });
           
           saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Uploaden naar Supabase...</span>';
 
