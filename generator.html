@@ -2155,27 +2155,22 @@
         saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Opslaan...</span>';
 
         try {
-          // Fetch video as blob
-          const videoBlob = await fetch(videoElement.src).then(r => r.blob());
-          
-          // Generate filename
-          const timestamp = Date.now();
-          const safeTitle = videoName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-          const basePath = this.currentUserId ? `videos/${this.currentUserId}` : 'videos';
-          const filename = `${basePath}/${timestamp}-${safeTitle}.mp4`;
-
-          // Direct upload to Vercel Blob using fetch with FormData
-          const formData = new FormData();
-          formData.append('file', videoBlob, filename);
-
-          const response = await fetch('/api/videos/upload-direct', {
+          // Save video metadata with Shotstack URL directly (no re-upload needed)
+          const response = await fetch('/api/videos/save-metadata', {
             method: 'POST',
-            body: formData
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: videoName,
+              videoUrl: videoElement.src, // Shotstack URL directly
+              type: 'ai-generated',
+              duration: videoElement.duration || 0,
+              userId: this.currentUserId
+            })
           });
 
           if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Upload mislukt');
+            throw new Error(error.error || 'Opslaan mislukt');
           }
 
           const result = await response.json();
