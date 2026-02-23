@@ -2226,6 +2226,39 @@
 
           if (dbError) console.warn('Metadata save warning:', dbError);
 
+          console.log('[VideoStudio] Video uploaded:', publicUrl);
+
+          // Sync video to TravelC Studio database
+          try {
+            const webhookUrl = `https://huaaogdxxdcakxryecnw.supabase.co/functions/v1/video-webhook`;
+            const webhookResponse = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+              },
+              body: JSON.stringify({
+                brand_id: this.boltConfig.brandId || this.currentUserId,
+                title: videoName || 'Mijn Video',
+                slug: `${this.boltConfig.brandId || this.currentUserId || 'video'}-${Date.now()}`,
+                description: '',
+                video_url: publicUrl,
+                thumbnail_url: null,
+                duration_seconds: Math.round(videoElement.duration || 0),
+                status: 'published',
+                trip_id: this.boltConfig.tripId || null
+              })
+            });
+            
+            if (webhookResponse.ok) {
+              console.log('[VideoStudio] ✅ Video synced to database');
+            } else {
+              console.error('[VideoStudio] ❌ Failed to sync:', await webhookResponse.text());
+            }
+          } catch (err) {
+            console.error('[VideoStudio] ❌ Webhook error:', err);
+          }
+
           saveStatus.innerHTML = '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i> Video opgeslagen!</span>';
 
           // Reload videos
