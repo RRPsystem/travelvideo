@@ -2187,64 +2187,13 @@
           return;
         }
 
-        saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Video downloaden...</span>';
+        saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Opslaan...</span>';
 
         try {
-          // Download video from Shotstack using XMLHttpRequest (avoids some CORS issues)
-          const videoBlob = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', videoElement.src, true);
-            xhr.responseType = 'blob';
-            xhr.onload = () => {
-              if (xhr.status === 200) {
-                resolve(xhr.response);
-              } else {
-                reject(new Error(`Download failed: ${xhr.status}`));
-              }
-            };
-            xhr.onerror = () => reject(new Error('Download failed'));
-            xhr.onprogress = (e) => {
-              if (e.lengthComputable) {
-                const pct = Math.round((e.loaded / e.total) * 100);
-                saveStatus.innerHTML = `<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Downloaden... ${pct}%</span>`;
-              }
-            };
-            xhr.send();
-          });
-          
-          saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Uploaden...</span>';
-
-          // Convert blob to base64 for server upload
-          const base64Data = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(videoBlob);
-          });
-
-          // Upload via server endpoint (bypasses Supabase RLS issues)
-          console.log('[VideoStudio] Uploading via server...');
-          const uploadResponse = await fetch('/api/videos/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              videoData: base64Data,
-              title: videoName,
-              type: 'ai-generated',
-              duration: Math.round(videoElement.duration || 0),
-              userId: this.currentUserId
-            })
-          });
-
-          if (!uploadResponse.ok) {
-            const uploadError = await uploadResponse.json();
-            console.error('[VideoStudio] Upload error:', uploadError);
-            throw new Error(uploadError.detail || uploadError.error || 'Upload mislukt');
-          }
-
-          const uploadResult = await uploadResponse.json();
-          const publicUrl = uploadResult.video.videoUrl;
-          console.log('[VideoStudio] Video uploaded:', publicUrl);
+          // Use the Shotstack video URL directly (no need to re-upload)
+          // The video is already hosted on Shotstack CDN
+          const publicUrl = videoElement.src;
+          console.log('[VideoStudio] Saving video URL:', publicUrl);
 
           // Save metadata to Supabase database
           const { error: dbError } = await this.supabase
