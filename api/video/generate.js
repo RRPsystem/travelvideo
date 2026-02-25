@@ -42,20 +42,33 @@ module.exports = async function(req, res) {
       return res.status(400).json({ error: 'Geen bestemmingen opgegeven' });
     }
 
-    console.log('[VideoGen] Generating video for:', { title, destinations: destinations.length });
+    console.log('[VideoGen] Generating video for:', { title, destinations: destinations.length, providedClips: clips.length });
 
-    // Step 1: Search video clips (multiple per destination)
-    const clipPromises = destinations.map(dest => 
-      searchMultipleVideoClips(dest.name || dest, PEXELS_API_KEY, clipsPerDestination)
-    );
-    const clipsPerDest = await Promise.all(clipPromises);
-    const validClips = clipsPerDest.flat().filter(c => c !== null);
+    // Step 1: Use provided clips OR search via Pexels
+    let validClips = [];
+    
+    if (clips && clips.length > 0) {
+      // Use clips provided by the client (user-selected clips)
+      validClips = clips.map(clip => ({
+        destination: clip.destination || 'Clip',
+        url: clip.url,
+        duration: clip.duration || clipDuration,
+        thumbnail: clip.thumbnail || null
+      }));
+      console.log('[VideoGen] Using provided clips:', validClips.length);
+    } else {
+      // Fallback: Search video clips via Pexels (multiple per destination)
+      const clipPromises = destinations.map(dest => 
+        searchMultipleVideoClips(dest.name || dest, PEXELS_API_KEY, clipsPerDestination)
+      );
+      const clipsPerDest = await Promise.all(clipPromises);
+      validClips = clipsPerDest.flat().filter(c => c !== null);
+      console.log('[VideoGen] Found Pexels clips:', validClips.length);
+    }
     
     if (validClips.length === 0) {
       return res.status(404).json({ error: 'Geen video clips gevonden' });
     }
-
-    console.log('[VideoGen] Found clips:', validClips.length);
 
     // Step 2: Create timeline with travel data overlays
     const timeline = createTimeline(validClips, title, clipDuration, voiceoverUrl, {
