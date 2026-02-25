@@ -1793,15 +1793,38 @@
         grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i><p style="margin-top: 12px;">Laden...</p></div>';
 
         try {
-          // Include userId for user-isolated video list
-          const url = this.currentUserId 
-            ? `/api/videos/list?userId=${encodeURIComponent(this.currentUserId)}`
-            : '/api/videos/list';
-          const response = await fetch(url);
-          const data = await response.json();
+          // Load videos from Supabase brand_videos table
+          let query = this.supabase
+            .from('brand_videos')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          // Filter by user_id if available
+          if (this.currentUserId) {
+            query = query.eq('user_id', this.currentUserId);
+          }
+          
+          const { data: videos, error } = await query;
+          
+          if (error) {
+            console.error('[VideoStudio] Supabase query error:', error);
+            throw new Error(error.message);
+          }
 
-          if (data.success && data.videos && data.videos.length > 0) {
-            this.videos = data.videos;
+          console.log('[VideoStudio] Loaded videos:', videos?.length || 0);
+
+          if (videos && videos.length > 0) {
+            // Transform to expected format
+            this.videos = videos.map(v => ({
+              id: v.id,
+              title: v.title || 'Untitled Video',
+              type: v.type || 'ai-generated',
+              videoUrl: v.video_url,
+              thumbnail: v.thumbnail_url || v.video_url,
+              duration: v.duration_seconds,
+              status: v.status,
+              createdAt: v.created_at
+            }));
             this.renderVideos();
             this.updateStats();
           } else {
@@ -2198,14 +2221,18 @@
           const filePath = this.currentUserId ? `${this.currentUserId}/${filename}` : `public/${filename}`;
 
           // Upload directly to Supabase Storage (client-side)
+          console.log('[VideoStudio] Uploading to path:', filePath);
           const { data, error } = await this.supabase.storage
             .from('videos')
             .upload(filePath, videoBlob, {
               contentType: 'video/mp4',
-              upsert: false
+              upsert: true // Allow overwrite if exists
             });
 
-          if (error) throw new Error(error.message);
+          if (error) {
+            console.error('[VideoStudio] Storage upload error:', error);
+            throw new Error(error.message || 'Upload naar storage mislukt');
+          }
 
           // Get public URL
           const { data: urlData } = this.supabase.storage
