@@ -2212,36 +2212,41 @@
             xhr.send();
           });
           
-          saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Uploaden naar Supabase...</span>';
+          saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Uploaden...</span>';
 
-          // Generate filename
-          const timestamp = Date.now();
-          const safeTitle = videoName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-          const filename = `${timestamp}-${safeTitle}.mp4`;
-          const filePath = this.currentUserId ? `${this.currentUserId}/${filename}` : `public/${filename}`;
+          // Convert blob to base64 for server upload
+          const base64Data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(videoBlob);
+          });
 
-          // Upload directly to Supabase Storage (client-side)
-          console.log('[VideoStudio] Uploading to path:', filePath);
-          const { data, error } = await this.supabase.storage
-            .from('videos')
-            .upload(filePath, videoBlob, {
-              contentType: 'video/mp4',
-              upsert: true // Allow overwrite if exists
-            });
+          // Upload via server endpoint (bypasses Supabase RLS issues)
+          console.log('[VideoStudio] Uploading via server...');
+          const uploadResponse = await fetch('/api/videos/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              videoData: base64Data,
+              title: videoName,
+              type: 'ai-generated',
+              duration: Math.round(videoElement.duration || 0),
+              userId: this.currentUserId
+            })
+          });
 
-          if (error) {
-            console.error('[VideoStudio] Storage upload error:', error);
-            throw new Error(error.message || 'Upload naar storage mislukt');
+          if (!uploadResponse.ok) {
+            const uploadError = await uploadResponse.json();
+            console.error('[VideoStudio] Upload error:', uploadError);
+            throw new Error(uploadError.detail || uploadError.error || 'Upload mislukt');
           }
 
-          // Get public URL
-          const { data: urlData } = this.supabase.storage
-            .from('videos')
-            .getPublicUrl(filePath);
+          const uploadResult = await uploadResponse.json();
+          const publicUrl = uploadResult.video.videoUrl;
+          console.log('[VideoStudio] Video uploaded:', publicUrl);
 
-          const publicUrl = urlData.publicUrl;
-
-          // Save metadata to database
+          // Save metadata to Supabase database
           const { error: dbError } = await this.supabase
             .from('brand_videos')
             .insert({
