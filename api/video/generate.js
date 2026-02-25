@@ -35,7 +35,8 @@ module.exports = async function(req, res) {
       showFlightOverlay = true, // Show flight info overlay
       overlayDuration = 0.4,    // Overlay shows for 40% of clip duration (max 50%)
       template = null,          // Selected template ID
-      templateConfig = null     // Template configuration (colors, styles, etc.)
+      templateConfig = null,    // Template configuration (colors, styles, etc.)
+      transition = 'fade'       // Transition type between clips
     } = req.body;
 
     if (!destinations || destinations.length === 0) {
@@ -78,7 +79,8 @@ module.exports = async function(req, res) {
       overlayDuration: Math.min(overlayDuration, 0.5), // Max 50%
       template,
       templateConfig,
-      destinations
+      destinations,
+      transition
     });
 
     // Step 3: Submit to Shotstack
@@ -161,7 +163,8 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
     overlayDuration = 0.4,
     template = null,
     templateConfig = null,
-    destinations: destList = []
+    destinations: destList = [],
+    transition = 'fade'
   } = options;
   
   const tracks = [];
@@ -170,8 +173,10 @@ function createTimeline(clips, title, clipDuration, voiceoverUrl, options = {}) 
 
   // Template styling defaults
   const titleStyle = templateConfig?.titleStyle || 'minimal';
-  const transitionType = templateConfig?.transition || 'fade';
+  const transitionType = transition || templateConfig?.transition || 'fade';
   const overlayPosition = templateConfig?.overlayPosition || 'bottomLeft';
+  
+  console.log('[VideoGen] Using transition:', transitionType);
 
   // Extract hotels and flights from travel data
   const hotels = travelData?.hotels || [];

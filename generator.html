@@ -1316,6 +1316,44 @@
           <label>Duur per clip: <span id="durationValue">7</span> seconden</label>
           <input type="range" id="clipDuration" min="2" max="15" value="7" step="0.5">
         </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label><i class="fas fa-random" style="color: #8b5cf6; margin-right: 6px;"></i> Overgang tussen clips</label>
+          <div id="transitionSelector" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
+            <button type="button" class="transition-btn active" data-transition="fade" style="padding: 12px 8px; background: rgba(139, 92, 246, 0.2); border: 2px solid #8b5cf6; border-radius: 8px; color: #e2e8f0; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-adjust" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Fade
+            </button>
+            <button type="button" class="transition-btn" data-transition="slideLeft" style="padding: 12px 8px; background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-arrow-left" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Slide Links
+            </button>
+            <button type="button" class="transition-btn" data-transition="slideRight" style="padding: 12px 8px; background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-arrow-right" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Slide Rechts
+            </button>
+            <button type="button" class="transition-btn" data-transition="slideUp" style="padding: 12px 8px; background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-arrow-up" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Slide Omhoog
+            </button>
+            <button type="button" class="transition-btn" data-transition="slideDown" style="padding: 12px 8px; background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-arrow-down" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Slide Omlaag
+            </button>
+            <button type="button" class="transition-btn" data-transition="zoom" style="padding: 12px 8px; background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-search-plus" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Zoom
+            </button>
+            <button type="button" class="transition-btn" data-transition="wipeLeft" style="padding: 12px 8px; background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-eraser" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Wipe
+            </button>
+            <button type="button" class="transition-btn" data-transition="carouselLeft" style="padding: 12px 8px; background: rgba(51, 65, 85, 0.5); border: 2px solid #334155; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+              <i class="fas fa-images" style="display: block; font-size: 18px; margin-bottom: 4px;"></i>
+              Carousel
+            </button>
+          </div>
+        </div>
         
         <!-- Overlay Settings (only show when travelData is available) -->
         <div id="overlaySettings" style="display: none; margin-top: 20px; padding: 16px; background: rgba(139, 92, 246, 0.1); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3);">
@@ -1601,6 +1639,25 @@
           });
         }
 
+        // Setup transition selector
+        this.selectedTransition = 'fade';
+        document.querySelectorAll('.transition-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.transition-btn').forEach(b => {
+              b.style.background = 'rgba(51, 65, 85, 0.5)';
+              b.style.borderColor = '#334155';
+              b.style.color = '#94a3b8';
+              b.classList.remove('active');
+            });
+            btn.style.background = 'rgba(139, 92, 246, 0.2)';
+            btn.style.borderColor = '#8b5cf6';
+            btn.style.color = '#e2e8f0';
+            btn.classList.add('active');
+            this.selectedTransition = btn.dataset.transition;
+            console.log('[VideoStudio] Transition selected:', this.selectedTransition);
+          });
+        });
+
         // Setup voiceover upload
         document.getElementById('voiceoverInput').addEventListener('change', (e) => {
           this.handleVoiceoverUpload(e);
@@ -1858,7 +1915,7 @@
         grid.innerHTML = this.videos.map(video => `
           <div class="video-card" onclick="VideoStudio.openVideo('${video.id}')">
             <div class="video-card-thumbnail">
-              <img src="${video.thumbnail || video.videoUrl}" alt="${video.title}" onerror="this.style.display='none'">
+              <video src="${video.videoUrl}" muted preload="metadata" style="width: 100%; height: 100%; object-fit: cover;" onloadeddata="this.currentTime = 1;"></video>
               <div class="video-card-play">
                 <i class="fas fa-play"></i>
               </div>
@@ -1871,6 +1928,9 @@
                 <div class="video-card-actions">
                   <button onclick="event.stopPropagation(); VideoStudio.downloadVideo('${video.videoUrl}', '${video.title}')" title="Download">
                     <i class="fas fa-download"></i>
+                  </button>
+                  <button onclick="event.stopPropagation(); VideoStudio.deleteVideo('${video.id}')" title="Verwijderen" style="color: #ef4444;">
+                    <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </div>
@@ -1933,12 +1993,13 @@
         a.click();
       },
 
-      async deleteVideo() {
-        if (!this.currentVideoId) return;
+      async deleteVideo(videoId) {
+        const targetId = videoId || this.currentVideoId;
+        if (!targetId) return;
         
         if (!confirm('Weet je zeker dat je deze video wilt verwijderen?')) return;
 
-        const video = this.videos.find(v => v.id === this.currentVideoId);
+        const video = this.videos.find(v => v.id === targetId);
         if (!video) return;
 
         try {
@@ -1957,8 +2018,10 @@
         }
 
         // Remove from local list
-        this.videos = this.videos.filter(v => v.id !== this.currentVideoId);
-        this.closeModal();
+        this.videos = this.videos.filter(v => v.id !== targetId);
+        if (this.currentVideoId === targetId) {
+          this.closeModal();
+        }
         this.renderVideos();
         this.updateStats();
       },
@@ -2101,7 +2164,8 @@
             showFlightOverlay: showFlightOverlay,
             overlayDuration: overlayDuration,
             template: this.selectedTemplate,
-            templateConfig: this.selectedTemplate ? this.templates[this.selectedTemplate] : null
+            templateConfig: this.selectedTemplate ? this.templates[this.selectedTemplate] : null,
+            transition: this.selectedTransition || 'fade'
           };
 
           const response = await fetch('/api/video/generate', {
