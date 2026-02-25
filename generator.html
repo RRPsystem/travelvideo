@@ -2105,10 +2105,12 @@
 
           if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || 'Video generatie mislukt');
+            console.error('[VideoStudio] API Error:', error);
+            throw new Error(error.message || error.detail || error.error || 'Video generatie mislukt');
           }
 
           const result = await response.json();
+          console.log('[VideoStudio] Render started:', result.renderId);
           this.renderId = result.renderId;
 
           // Start polling
