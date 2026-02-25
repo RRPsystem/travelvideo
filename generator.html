@@ -1793,38 +1793,22 @@
         grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i><p style="margin-top: 12px;">Laden...</p></div>';
 
         try {
-          // Load videos from Supabase brand_videos table
-          let query = this.supabase
-            .from('brand_videos')
-            .select('*')
-            .order('created_at', { ascending: false });
+          // Load videos from Vercel Blob Storage via server API
+          const url = this.currentUserId 
+            ? `/api/videos/list?userId=${encodeURIComponent(this.currentUserId)}`
+            : '/api/videos/list';
           
-          // Filter by user_id if available
-          if (this.currentUserId) {
-            query = query.eq('user_id', this.currentUserId);
-          }
+          const response = await fetch(url);
+          const data = await response.json();
           
-          const { data: videos, error } = await query;
-          
-          if (error) {
-            console.error('[VideoStudio] Supabase query error:', error);
-            throw new Error(error.message);
+          if (!response.ok) {
+            throw new Error(data.detail || data.error || 'Laden mislukt');
           }
 
-          console.log('[VideoStudio] Loaded videos:', videos?.length || 0);
+          console.log('[VideoStudio] Loaded from cloud:', data.videos?.length || 0);
 
-          if (videos && videos.length > 0) {
-            // Transform to expected format
-            this.videos = videos.map(v => ({
-              id: v.id,
-              title: v.title || 'Untitled Video',
-              type: v.type || 'ai-generated',
-              videoUrl: v.video_url,
-              thumbnail: v.thumbnail_url || v.video_url,
-              duration: v.duration_seconds,
-              status: v.status,
-              createdAt: v.created_at
-            }));
+          if (data.success && data.videos && data.videos.length > 0) {
+            this.videos = data.videos;
             this.renderVideos();
             this.updateStats();
           } else {
@@ -2187,29 +2171,53 @@
           return;
         }
 
-        saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Opslaan...</span>';
+        saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Downloaden van Shotstack...</span>';
 
         try {
-          // Use the Shotstack video URL directly (no need to re-upload)
-          // The video is already hosted on Shotstack CDN
-          const publicUrl = videoElement.src;
-          console.log('[VideoStudio] Saving video URL:', publicUrl);
+          const sourceUrl = videoElement.src;
+          
+          // Download video from Shotstack
+          const videoBlob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', sourceUrl, true);
+            xhr.responseType = 'blob';
+            xhr.onload = () => {
+              if (xhr.status === 200) resolve(xhr.response);
+              else reject(new Error(`Download failed: ${xhr.status}`));
+            };
+            xhr.onerror = () => reject(new Error('Download failed'));
+            xhr.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                saveStatus.innerHTML = `<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Downloaden... ${pct}%</span>`;
+              }
+            };
+            xhr.send();
+          });
 
-          // Save metadata to Supabase database
-          const { error: dbError } = await this.supabase
-            .from('brand_videos')
-            .insert({
-              title: videoName,
-              video_url: publicUrl,
-              type: 'ai-generated',
-              duration_seconds: Math.round(videoElement.duration || 0),
-              status: 'published',
-              user_id: this.currentUserId
-            });
+          saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Uploaden naar cloud...</span>';
 
-          if (dbError) console.warn('Metadata save warning:', dbError);
+          // Upload to Vercel Blob Storage via server API
+          const formData = new FormData();
+          formData.append('video', videoBlob, `${videoName}.mp4`);
+          formData.append('title', videoName);
+          formData.append('userId', this.currentUserId || '');
+          formData.append('duration', Math.round(videoElement.duration || 0));
 
-          console.log('[VideoStudio] Video uploaded:', publicUrl);
+          const uploadResponse = await fetch('/api/videos/upload-blob', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.detail || errorData.error || 'Upload mislukt');
+          }
+
+          const uploadResult = await uploadResponse.json();
+          const publicUrl = uploadResult.video.videoUrl;
+          
+          console.log('[VideoStudio] Video saved to cloud:', publicUrl);
 
           // Sync video to TravelC Studio database
           try {
