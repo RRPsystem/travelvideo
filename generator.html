@@ -2285,7 +2285,7 @@
 
           // Sync video to TravelC Studio database
           try {
-            const webhookUrl = urlParams.get('video_webhook') || `https://reisstudio.netlify.app/api/video-webhook`;
+            const webhookUrl = new URLSearchParams(window.location.search).get('video_webhook') || `https://reisstudio.netlify.app/api/video-webhook`;
             const webhookResponse = await fetch(webhookUrl, {
               method: 'POST',
               headers: {
@@ -2692,4 +2692,5 @@
   </script>
 </body>
 </html>
+
 
