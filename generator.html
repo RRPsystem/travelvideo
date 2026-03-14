@@ -2261,25 +2261,28 @@
 
           saveStatus.innerHTML = '<span style="color: #94a3b8;"><i class="fas fa-spinner fa-spin"></i> Uploaden naar cloud...</span>';
 
-          // Upload to Vercel Blob Storage via server API
-          const formData = new FormData();
-          formData.append('video', videoBlob, `${videoName}.mp4`);
-          formData.append('title', videoName);
-          formData.append('userId', this.currentUserId || '');
-          formData.append('duration', Math.round(videoElement.duration || 0));
-
-          const uploadResponse = await fetch('/api/videos/upload-blob', {
-            method: 'POST',
-            body: formData
-          });
-
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json();
-            throw new Error(errorData.detail || errorData.error || 'Upload mislukt');
+          // Upload directly to Supabase Storage (bypasses Vercel size limits)
+          const brandId = this.boltConfig.brandId || this.currentUserId || 'default';
+          const fileName = `video-${Date.now()}.mp4`;
+          const filePath = `${brandId}/${fileName}`;
+          
+          const { data: uploadData, error: uploadError } = await this.supabase.storage
+            .from('brand-videos')
+            .upload(filePath, videoBlob, {
+              contentType: 'video/mp4',
+              upsert: true
+            });
+          
+          if (uploadError) {
+            console.error('[VideoStudio] Supabase upload error:', uploadError);
+            throw new Error(uploadError.message || 'Upload naar Supabase mislukt');
           }
-
-          const uploadResult = await uploadResponse.json();
-          const publicUrl = uploadResult.video.videoUrl;
+          
+          const { data: urlData } = this.supabase.storage
+            .from('brand-videos')
+            .getPublicUrl(filePath);
+          
+          const publicUrl = urlData.publicUrl;
           
           console.log('[VideoStudio] Video saved to cloud:', publicUrl);
 
@@ -2692,5 +2695,6 @@
   </script>
 </body>
 </html>
+
 
 
